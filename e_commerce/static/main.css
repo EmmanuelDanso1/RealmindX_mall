@@ -1,0 +1,10 @@
+.track-form input, .newsletter input, .track-form button, .newsletter button {
+    border-radius: 30px;
+    padding: 10px 20px;
+}
+.whatsapp-float {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+}

@@ -1,0 +1,29 @@
+{% extends "index.html" %}
+
+{% block title %}Welcome | RealmindXEduMall{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <h2 class="mb-4">Latest Products</h2>
+  <div class="row">
+    {% for product in products %}
+    <div class="col-md-4 mb-4">
+      <div class="card h-100 shadow-sm border-0">
+        <img 
+          src="{{ url_for('static', filename='uploads/' ~ product.image_filename) }}" 
+          class="card-img-top" 
+          alt="{{ product.name }}" 
+          style="height: 250px; object-fit: cover;"
+        >
+        <div class="card-body">
+          <h5 class="card-title">{{ product.name }}</h5>
+          <p class="card-text">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
+          <p class="text-primary fw-bold">₵{{ '%.2f'|format(product.price) }}</p>
+          <a href="#" class="btn btn-outline-dark btn-sm">Add to cart</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
