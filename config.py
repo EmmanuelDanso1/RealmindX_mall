@@ -7,7 +7,7 @@ class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key')
 
     # SQLite DB absolute path
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(BASE_DIR, 'realmind_ecommerce.db')
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(BASE_DIR, 'realmindx_ecommerce.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Directory for product image uploads
