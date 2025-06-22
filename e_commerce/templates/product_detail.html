@@ -1,0 +1,31 @@
+<div class="mt-4">
+  <h5>Ratings</h5>
+
+  <!-- ⭐ Show average rating -->
+  <p class="text-warning">
+    ⭐ {{ product.average_rating }}/5
+    <small>({{ product.ratings|length }} reviews)</small>
+  </p>
+
+  {% if current_user.is_authenticated %}
+    {% if user_rating %}
+      <!-- 🚫 Already rated -->
+      <p class="text-muted">You rated this product: ⭐ {{ user_rating.rating }}/5</p>
+    {% else %}
+      <!-- ✅ Rating form -->
+      <form method="POST" action="{{ url_for('main.rate_product', product_id=product.id) }}">
+        <label for="rating">Rate this product:</label>
+        <select name="rating" id="rating" class="form-select w-auto d-inline-block mx-2" required>
+          <option value="">Choose</option>
+          {% for i in range(1, 6) %}
+          <option value="{{ i }}">{{ i }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-sm btn-primary">Submit</button>
+      </form>
+    {% endif %}
+  {% else %}
+  <!-- add authentication to login -->
+    <p><a href="#">Log in</a> to rate this product.</p>
+  {% endif %}
+</div>

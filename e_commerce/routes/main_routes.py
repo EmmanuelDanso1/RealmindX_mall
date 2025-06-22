@@ -1,5 +1,7 @@
-from flask import Blueprint, render_template, request
-from e_commerce.models import Product
+from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app
+from flask_login import login_required, current_user
+from e_commerce import db
+from e_commerce.models import Product, ProductRating
 
 main_bp = Blueprint('main', __name__)
 
@@ -11,6 +13,31 @@ def home():
 @main_bp.route('/contact')
 def contact():
     return render_template("contact.html")  # Replace with template if needed
+
+# Product rating
+@main_bp.route('/rate/<int:product_id>', methods=['POST'])
+@login_required
+def rate_product(product_id):
+    rating_value = int(request.form['rating'])
+    existing = ProductRating.query.filter_by(user_id=current_user.id, product_id=product_id).first()
+
+    if existing:
+        existing.rating = rating_value
+    else:
+        new_rating = ProductRating(user_id=current_user.id, product_id=product_id, rating=rating_value)
+        db.session.add(new_rating)
+
+    db.session.commit()
+    flash("Rating submitted!", "success")
+    return redirect(url_for('main.home'))
+
+@main_bp.route('/product/<int:product_id>')
+def view_product(product_id):
+    product = Product.query.get_or_404(product_id)
+    user_rating = None
+    if current_user.is_authenticated:
+        user_rating = ProductRating.query.filter_by(user_id=current_user.id, product_id=product_id).first()
+    return render_template("product_detail.html", product=product, user_rating=user_rating)
 
 @main_bp.route('/track-your-order', methods=['GET', 'POST'])
 def track_order():

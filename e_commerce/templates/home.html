@@ -19,7 +19,16 @@
           <h5 class="card-title">{{ product.name }}</h5>
           <p class="card-text">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
           <p class="text-primary fw-bold">₵{{ '%.2f'|format(product.price) }}</p>
-          <a href="#" class="btn btn-outline-dark btn-sm">Add to cart</a>
+
+          <!-- In Stock / Out of Stock Badge -->
+          {% if product.in_stock %}
+            <span class="badge bg-success mb-2">In Stock</span>
+          {% else %}
+            <span class="badge bg-danger mb-2">Out of Stock</span>
+          {% endif %}
+
+          <br>
+          <a href="#" class="btn btn-outline-dark btn-sm mt-2">Add to cart</a>
         </div>
       </div>
     </div>
