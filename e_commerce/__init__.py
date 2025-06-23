@@ -4,6 +4,7 @@ from flask_login import LoginManager
 from flask_migrate import Migrate
 from dotenv import load_dotenv
 import os
+from flask_mail import Mail
 
 # Load environment variables
 load_dotenv()
@@ -12,6 +13,7 @@ load_dotenv()
 db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
+mail = Mail()
 
 def create_app():
     app = Flask(__name__)
@@ -24,6 +26,7 @@ def create_app():
     migrate.init_app(app, db)
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'  # Route name for login
+    mail.init_app(app)
 
     # Import User after db is initialized
     from e_commerce.models.user import User

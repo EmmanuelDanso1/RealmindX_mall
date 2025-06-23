@@ -1,7 +1,9 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app
 from flask_login import login_required, current_user
-from e_commerce import db
+from flask_mail import Mail,Message
+from e_commerce import db, mail
 from e_commerce.models import Product, ProductRating, NewsletterSubscriber
+from e_commerce.utils.token import generate_verification_token, confirm_verification_token
 
 main_bp = Blueprint('main', __name__)
 
@@ -49,22 +51,46 @@ def track_order():
     return render_template("track_order.html")
 
 # NewsLetter subscription
-@main_bp.route('/subscribe-newsletter', methods=['POST'])
+@main_bp.route('/subscribe', methods=['POST'])
 def subscribe_newsletter():
     email = request.form.get('email')
 
-    if not email:
-        flash("Please enter a valid email address.", "warning")
-        return redirect(request.referrer or url_for('main.home'))
-
-    # Check if already subscribed
     existing = NewsletterSubscriber.query.filter_by(email=email).first()
     if existing:
-        flash("You're already subscribed!", "info")
-    else:
-        new_subscriber = NewsletterSubscriber(email=email)
-        db.session.add(new_subscriber)
-        db.session.commit()
-        flash("Thanks for subscribing to our newsletter!", "success")
+        flash("Email is already subscribed.", "info")
+        return redirect(url_for('main.home'))
 
-    return redirect(request.referrer or url_for('main.home'))
+    token = generate_verification_token(email)
+    confirm_url = url_for('main.confirm_subscription', token=token, _external=True)
+    html = render_template('emails/confirm_newsletter.html', confirm_url=confirm_url)
+
+    msg = Message("Confirm your newsletter subscription", recipients=[email], html=html)
+    mail.send(msg)
+
+    new_subscriber = NewsletterSubscriber(email=email, is_verified=False)
+    db.session.add(new_subscriber)
+    db.session.commit()
+
+    flash("A confirmation email has been sent to verify your subscription.", "success")
+    return redirect(url_for('main.home'))
+
+@main_bp.route('/confirm-newsletter/<token>')
+def confirm_subscription(token):
+    email = confirm_verification_token(token)
+    if not email:
+        flash("The confirmation link is invalid or has expired.", "danger")
+        return redirect(url_for('main.home'))
+
+    subscriber = NewsletterSubscriber.query.filter_by(email=email).first()
+    if not subscriber:
+        flash("No matching subscriber found.", "warning")
+        return redirect(url_for('main.home'))
+
+    if subscriber.is_verified:
+        flash("Subscription already confirmed.", "info")
+    else:
+        subscriber.is_verified = True
+        db.session.commit()
+        flash("Your subscription has been confirmed. Thank you!", "success")
+
+    return redirect(url_for('main.home'))
