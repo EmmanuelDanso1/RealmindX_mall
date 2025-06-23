@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app
 from flask_login import login_required, current_user
 from e_commerce import db
-from e_commerce.models import Product, ProductRating
+from e_commerce.models import Product, ProductRating, NewsletterSubscriber
 
 main_bp = Blueprint('main', __name__)
 
@@ -12,7 +12,7 @@ def home():
 
 @main_bp.route('/contact')
 def contact():
-    return render_template("contact.html")  # Replace with template if needed
+    return render_template("contact.html")
 
 # Product rating
 @main_bp.route('/rate/<int:product_id>', methods=['POST'])
@@ -47,3 +47,24 @@ def track_order():
         # You could add logic here to fetch order data
         return render_template("track_order.html", order_id=order_id, billing_email=billing_email)
     return render_template("track_order.html")
+
+# NewsLetter subscription
+@main_bp.route('/subscribe-newsletter', methods=['POST'])
+def subscribe_newsletter():
+    email = request.form.get('email')
+
+    if not email:
+        flash("Please enter a valid email address.", "warning")
+        return redirect(request.referrer or url_for('main.home'))
+
+    # Check if already subscribed
+    existing = NewsletterSubscriber.query.filter_by(email=email).first()
+    if existing:
+        flash("You're already subscribed!", "info")
+    else:
+        new_subscriber = NewsletterSubscriber(email=email)
+        db.session.add(new_subscriber)
+        db.session.commit()
+        flash("Thanks for subscribing to our newsletter!", "success")
+
+    return redirect(request.referrer or url_for('main.home'))

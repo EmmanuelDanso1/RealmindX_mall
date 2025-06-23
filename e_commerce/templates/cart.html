@@ -1,0 +1,64 @@
+{% extends "index.html" %}
+{% block title %}Your Cart{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <h2 class="mb-4">Your Cart</h2>
+
+  {% if cart %}
+    <div class="table-responsive">
+      <table class="table table-bordered align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>Product</th>
+            <th>Price (₵)</th>
+            <th>Quantity</th>
+            <th>Total (₵)</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% set grand_total = 0 %}
+          {% for item in cart %}
+            {% set total = item.product.price * item.quantity %}
+            {% set grand_total = grand_total + total %}
+            <tr>
+              <td>
+                <div class="d-flex align-items-center">
+                  <img src="{{ url_for('static', filename='uploads/' ~ item.product.image_filename) }}"
+                       alt="{{ item.product.name }}" width="60" height="60" style="object-fit: cover;" class="me-2">
+                  <span>{{ item.product.name }}</span>
+                </div>
+              </td>
+              <td>₵{{ '%.2f'|format(item.product.price) }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>₵{{ '%.2f'|format(total) }}</td>
+              <td>
+                <form method="POST" action="{{ url_for('cart.remove_from_cart', product_id=item.product.id) }}"
+                      onsubmit="return confirm('Remove this item?');">
+                  <button class="btn btn-sm btn-danger">Remove</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr class="table-light">
+            <td colspan="3" class="text-end fw-bold">Grand Total:</td>
+            <td colspan="2" class="fw-bold text-success">₵{{ '%.2f'|format(grand_total) }}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="text-end">
+      <a href="{{ url_for('cart.checkout') }}" class="btn btn-primary btn-lg">Proceed to Checkout</a>
+    </div>
+  {% else %}
+    <div class="alert alert-info text-center">Your cart is currently empty.</div>
+    <div class="text-center">
+      <a href="{{ url_for('main.home') }}" class="btn btn-outline-dark mt-3">Continue Shopping</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

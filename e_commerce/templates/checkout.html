@@ -1,0 +1,67 @@
+{% extends "index.html" %}
+{% block title %}Checkout{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <h2 class="mb-4">Checkout</h2>
+
+  {% if cart %}
+    <form method="POST" action="{{ url_for('main.process_checkout') }}">
+      <div class="row">
+        <!-- Billing Info -->
+        <div class="col-md-6">
+          <h5>Billing Information</h5>
+          <div class="mb-3">
+            <label for="full_name" class="form-label">Full Name</label>
+            <input type="text" class="form-control" id="full_name" name="full_name" required>
+          </div>
+          <div class="mb-3">
+            <label for="email" class="form-label">Email Address</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+          </div>
+          <div class="mb-3">
+            <label for="address" class="form-label">Shipping Address</label>
+            <textarea class="form-control" id="address" name="address" rows="3" required></textarea>
+          </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="col-md-6">
+          <h5>Order Summary</h5>
+          <ul class="list-group mb-3">
+            {% set grand_total = 0 %}
+            {% for item in cart %}
+              {% set total = item.product.price * item.quantity %}
+              {% set grand_total = grand_total + total %}
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ item.product.name }} × {{ item.quantity }}
+                <span>₵{{ '%.2f'|format(total) }}</span>
+              </li>
+            {% endfor %}
+            <li class="list-group-item d-flex justify-content-between">
+              <strong>Total</strong>
+              <strong class="text-success">₵{{ '%.2f'|format(grand_total) }}</strong>
+            </li>
+          </ul>
+
+          <!-- Payment options (placeholder for now) -->
+          <div class="mb-3">
+            <label class="form-label">Payment Method</label>
+            <select class="form-select" name="payment_method" required>
+              <option value="paystack">Paystack</option>
+              <option value="cod">Cash on Delivery</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-success btn-lg w-100">Place Order</button>
+        </div>
+      </div>
+    </form>
+  {% else %}
+    <div class="alert alert-warning text-center">You have no items in your cart to checkout.</div>
+    <div class="text-center">
+      <a href="{{ url_for('main.home') }}" class="btn btn-outline-dark mt-3">Browse Products</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

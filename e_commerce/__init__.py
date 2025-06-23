@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_migrate import Migrate
@@ -42,8 +42,18 @@ def create_app():
     # Register blueprints
     from .routes.api_routes import api_bp
     from .routes.main_routes import main_bp
+    from .routes.cart_routes import cart_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(api_bp)
-
+    app.register_blueprint(cart_bp)
+    
+    # cart total
+    @app.context_processor
+    def cart_info():
+        cart = session.get('cart', {})
+        total_items = sum(item['quantity'] for item in cart.values())
+        total_amount = sum(item['price'] * item['quantity'] for item in cart.values())
+        return dict(cart_item_count=total_items, cart_total=total_amount)
+    
     return app

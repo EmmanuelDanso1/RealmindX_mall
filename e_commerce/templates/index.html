@@ -6,9 +6,6 @@
   <title>{% block title %}RealmindXEduMall{% endblock %}</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-  <style>
-    
-  </style>
 </head>
 <body>
 
@@ -17,7 +14,7 @@
     <div class="container">
       <a class="navbar-brand" href="{{ url_for('main.home') }}">
         <img src="{{ url_for('static', filename='images/brain.jpg') }}" alt="Logo" width="40">
-        <strong><span style="color: #0C2E60;">RealmindXEdu</spam></strong><span style="color: #0C2E60;">Mall</span>
+        <strong><span style="color: #0C2E60;">RealmindXEdu</span></strong><span style="color: #0C2E60;">Mall</span>
       </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
@@ -26,13 +23,34 @@
         <input class="form-control me-2" type="search" placeholder="Search for Products">
         <button class="btn text-white" style="background-color: #0C2E60;">Search</button>
       </form>
-        <div>
-          <a href="#" class="text-dark me-3"><i class="fas fa-heart"></i></a>
-          <a href="#" class="text-dark"><i class="fas fa-shopping-cart"></i> ₵0.00</a>
-        </div>
-
+      <div>
+        <a href="#" class="text-dark me-3"><i class="fas fa-heart"></i></a>
+        <a href="{{ url_for('cart.view_cart') }}" class="text-dark position-relative">
+          <i class="fas fa-shopping-cart"></i>
+          ₵{{ '%.2f'|format(cart_total or 0) }}
+          {% if cart_item_count %}
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+              {{ cart_item_count }}
+            </span>
+          {% endif %}
+        </a>
+      </div>
     </div>
   </nav>
+
+  <!-- Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="container mt-3">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
 
   <!-- Navigation -->
   <div class="bg-light py-2">
@@ -59,39 +77,32 @@
   </main>
 
   <!-- Newsletter -->
-<section class=" text-white py-4" style="background-color: #0C2E60;">
-  <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center" >
-    
-    <!-- Text -->
-    <p class="mb-3 mb-md-0 fs-6">
-      <i class="fas fa-paper-plane me-2"></i> Sign up to Newsletter 
-      <span class="text-white-50">...and receive <strong>free shipping for first shopping</strong></span>
-    </p>
+  <section class="text-white py-4" style="background-color: #0C2E60;">
+    <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center">
+      <p class="mb-3 mb-md-0 fs-6">
+        <i class="fas fa-paper-plane me-2"></i> Sign up to Newsletter 
+        <span class="text-white-50">...and receive <strong>free shipping for first shopping</strong></span>
+      </p>
+      <form method="POST" action="{{ url_for('main.subscribe_newsletter') }}" class="d-flex" style="max-width: 400px; width: 100%;">
+        <input type="email" name="email" class="form-control me-2" placeholder="Enter your email address" required>
+        <button class="btn btn-dark" type="submit">Signup</button>
+      </form>
+    </div>
+  </section>
 
-    <!-- Form -->
-    <form class="d-flex" style="max-width: 400px; width: 100%;">
-      <input type="email" class="form-control" placeholder="Enter your email address">
-      <button class="btn btn-dark" type="submit">signup</button>
-    </form>
-
-  </div>
-</section>
-
-<!-- WhatsApp Floating Button -->
+  <!-- WhatsApp Floating Button -->
   <a href="https://wa.me/233558099689" class="whatsapp-float">
     <img src="{{ url_for('static', filename='images/whatsapp.png') }}" alt="WhatsApp" width="60">
   </a>
-  
+
   <!-- Footer -->
   <footer class="bg-light py-5" style="color: #0C2E60;">
     <div class="container d-flex flex-wrap justify-content-between">
       <div class="mb-4">
         <h5><img src="{{ url_for('static', filename='images/brain.jpg') }}" width="40"><span style="color: #0C2E60;">RealmindXEduMall</span></h5>
-        <p><i class="fa fa-map-marker-alt"></i> <strong>Dome Pillar 2</strong><br>
-            Near Yellow Washing Bay
-        </p>
+        <p><i class="fa fa-map-marker-alt"></i> <strong>Dome Pillar 2</strong><br>Near Yellow Washing Bay</p>
         <p><i class="fa fa-phone"></i> +233 558 039 190</p>
-        <p><i class="fa fa-envelope"></i>realmindxgh@gmail.com</p>
+        <p><i class="fa fa-envelope"></i> realmindxgh@gmail.com</p>
         <p><i class="fa fa-clock me-2"></i> Mon - Sat: 8:00 AM – 6:00 PM</p>
       </div>
       <div>
@@ -114,7 +125,6 @@
       </div>
     </div>
   </footer>
-
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

@@ -28,11 +28,19 @@
           {% endif %}
 
           <br>
-          <a href="#" class="btn btn-outline-dark btn-sm mt-2">Add to cart</a>
+          {% if product.in_stock %}
+          <form method="POST" action="{{ url_for('cart.add_to_cart', product_id=product.id) }}">
+            <input type="hidden" name="product_id" value="{{ product.id }}">
+            <button type="submit" class="btn btn-outline-dark btn-sm mt-2">Add to cart</button>
+          </form>
+          {% else %}
+          <button class="btn btn-outline-dark btn-sm mt-2" disabled>Add to cart</button>
+          {% endif %}
         </div>
       </div>
     </div>
     {% endfor %}
   </div>
+
 </div>
 {% endblock %}
