@@ -4,29 +4,47 @@
 
 {% block content %}
 <div class="container my-5">
-  <h2 class="mb-4">Latest Products</h2>
+  <h2 class="text-center mb-4">Latest Products</h2>
   <div class="row">
     {% for product in products %}
     <div class="col-md-4 mb-4">
       <div class="card h-100 shadow-sm border-0">
-        <img 
-          src="{{ url_for('static', filename='uploads/' ~ product.image_filename) }}" 
-          class="card-img-top" 
-          alt="{{ product.name }}" 
-          style="height: 250px; object-fit: cover;"
-        >
+
+        <!-- Product Image Wrapper with Overlay -->
+        <div class="position-relative" style="height: 250px;">
+          <img 
+            src="{{ url_for('static', filename='uploads/' ~ product.image_filename) }}" 
+            class="card-img-top" 
+            alt="{{ product.name }}" 
+            style="height: 100%; object-fit: cover;"
+          >
+
+          {% if not product.in_stock %}
+          <!-- Out of Stock Overlay -->
+          <div class="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
+               style="background-color: rgba(0, 0, 0, 0.4); z-index: 10;">
+            <span class="text-white fw-bold" style="font-size: 2rem;">Out of Stock</span>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Product Details -->
         <div class="card-body">
           <h5 class="card-title">{{ product.name }}</h5>
-          <p class="card-text">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
+          <p class="card-text">
+            {{ product.description[:100] }}
+            {% if product.description|length > 100 %}...{% endif %}
+          </p>
           <p class="text-primary fw-bold">₵{{ '%.2f'|format(product.price) }}</p>
 
-          <!-- In Stock / Out of Stock Badge -->
+          <!-- Stock Status Badge -->
           {% if product.in_stock %}
             <span class="badge bg-success mb-2">In Stock</span>
           {% else %}
             <span class="badge bg-danger mb-2">Out of Stock</span>
           {% endif %}
 
+          <!-- Add to Cart Button -->
           <br>
           {% if product.in_stock %}
           <form method="POST" action="{{ url_for('cart.add_to_cart', product_id=product.id) }}">
@@ -41,6 +59,5 @@
     </div>
     {% endfor %}
   </div>
-
 </div>
 {% endblock %}
