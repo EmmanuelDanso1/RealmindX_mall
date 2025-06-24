@@ -12,10 +12,13 @@ class Product(db.Model):
     in_stock = db.Column(db.Boolean, default=True)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # ✅ Relationship to ratings
+    # Ratings relationship
     ratings = db.relationship('ProductRating', back_populates='product', lazy=True)
 
-    # ✅ Average rating property
+    # Category relationship
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
+    category = db.relationship('Category', back_populates='products')
+    # Average rating property
     @property
     def average_rating(self):
         if not self.ratings:

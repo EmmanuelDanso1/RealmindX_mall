@@ -1,8 +1,8 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app
+from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, jsonify
 from flask_login import login_required, current_user
 from flask_mail import Mail,Message
 from e_commerce import db, mail
-from e_commerce.models import Product, ProductRating, NewsletterSubscriber
+from e_commerce.models import Product, ProductRating, NewsletterSubscriber, Category
 from e_commerce.utils.token import generate_verification_token, confirm_verification_token
 
 main_bp = Blueprint('main', __name__)
@@ -94,3 +94,35 @@ def confirm_subscription(token):
         flash("Your subscription has been confirmed. Thank you!", "success")
 
     return redirect(url_for('main.home'))
+
+# search for product
+@main_bp.route('/search')
+def search():
+    query = request.args.get('q', '')
+    category_id = request.args.get('category')
+    min_price = request.args.get('min_price', type=float)
+    max_price = request.args.get('max_price', type=float)
+    in_stock = request.args.get('in_stock') == '1'
+
+    products = Product.query.filter(Product.name.ilike(f'%{query}%'))
+
+    if category_id:
+        products = products.filter_by(category_id=category_id)
+    if min_price is not None:
+        products = products.filter(Product.price >= min_price)
+    if max_price is not None:
+        products = products.filter(Product.price <= max_price)
+    if in_stock:
+        products = products.filter_by(in_stock=True)
+
+    categories = Category.query.all()  # <-- Ensure this is imported and passed
+
+    return render_template('search_results.html', products=products.all(), query=query, categories=categories)
+
+
+# autocomplete text
+@main_bp.route('/autocomplete')
+def autocomplete():
+    term = request.args.get('term', '')
+    results = Product.query.filter(Product.name.ilike(f"%{term}%")).limit(10).all()
+    return jsonify([p.name for p in results])
