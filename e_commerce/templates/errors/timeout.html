@@ -1,0 +1,9 @@
+{% extends "index.html" %}
+{% block title %}Timeout - Payment Error{% endblock %}
+{% block content %}
+<div class="container text-center my-5">
+  <h1 class="display-5 text-warning">Request Timed Out</h1>
+  <p class="lead">The request to Paystack took too long. Please try again in a moment.</p>
+  <a href="{{ url_for('cart.checkout') }}" class="btn btn-primary mt-3">Try Again</a>
+</div>
+{% endblock %}

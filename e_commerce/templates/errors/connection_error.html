@@ -1,0 +1,9 @@
+{% extends "index.html" %}
+{% block title %}Connection Error - Payment{% endblock %}
+{% block content %}
+<div class="container text-center my-5">
+  <h1 class="display-5 text-danger">Connection Error</h1>
+  <p class="lead">We couldn’t connect to Paystack. Please check your internet connection and try again.</p>
+  <a href="{{ url_for('cart.checkout') }}" class="btn btn-primary mt-3">Retry Payment</a>
+</div>
+{% endblock %}

@@ -61,6 +61,8 @@ def remove_from_cart(product_id):
     return redirect(url_for('cart.view_cart'))
 
 # Checkout
+from flask import render_template  # Ensure this is imported if not already
+
 @cart_bp.route('/cart/checkout', methods=['GET', 'POST'])
 @login_required
 def checkout():
@@ -111,22 +113,35 @@ def checkout():
                 "callback_url": url_for('cart.payment_callback', _external=True)
             }
 
-            response = requests.post('https://api.paystack.co/transaction/initialize', headers=headers, json=data)
+            initialize_url = 'https://api.paystack.co/transaction/initialize'
 
-            if response.status_code == 200:
-                auth_url = response.json()['data']['authorization_url']
-                return redirect(auth_url)
-            else:
-                flash("Failed to initiate Paystack payment.", "danger")
-                return redirect(url_for('cart.checkout'))
+            # ✅ Error-handled Paystack request
+            try:
+                response = requests.post(initialize_url, json=data, headers=headers, timeout=10)
+                response.raise_for_status()
+                payment_url = response.json()['data']['authorization_url']
+                return redirect(payment_url)
+
+            except requests.exceptions.Timeout:
+                flash("Request timed out. Please try again.", "warning")
+                return render_template("errors/timeout.html"), 504
+
+            except requests.exceptions.ConnectionError:
+                flash("Could not connect to Paystack. Check your internet and try again.", "danger")
+                return render_template("errors/connection_error.html"), 502
+
+            except requests.exceptions.RequestException as e:
+                flash("Something went wrong while initializing payment.", "danger")
+                return render_template("errors/general_error.html", error=str(e)), 500
 
         elif payment_method == 'cod':
-            # You can store the order to DB immediately here
+            # Save order logic can go here if needed
             flash("Order placed. You will pay on delivery.", "success")
             session.pop('cart', None)
             return redirect(url_for('main.order_success'))
 
     return render_template('checkout.html', cart=items, total=grand_total)
+
 
 # payment callback
 @cart_bp.route('/payment/callback')

@@ -1,0 +1,15 @@
+{% extends "index.html" %}
+{% block title %}Payment Error{% endblock %}
+{% block content %}
+<div class="container text-center my-5">
+  <h1 class="display-5 text-danger">Payment Error</h1>
+  <p class="lead">Something went wrong while initializing your payment.</p>
+  {% if error %}
+    <div class="alert alert-secondary text-start w-75 mx-auto mt-3">
+      <strong>Error Detail:</strong><br>
+      <code>{{ error }}</code>
+    </div>
+  {% endif %}
+  <a href="{{ url_for('cart.checkout') }}" class="btn btn-primary mt-4">Try Again</a>
+</div>
+{% endblock %}
