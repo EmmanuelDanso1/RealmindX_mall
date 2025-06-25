@@ -29,22 +29,27 @@
         <div class="col-md-6">
           <h5>Order Summary</h5>
           <ul class="list-group mb-3">
-            {% set grand_total = 0 %}
+            {% set ns = namespace(grand_total=0, total_items=0) %}
             {% for item in cart %}
               {% set total = item.product.price * item.quantity %}
-              {% set grand_total = grand_total + total %}
+              {% set ns.grand_total = ns.grand_total + total %}
+              {% set ns.total_items = ns.total_items + item.quantity %}
               <li class="list-group-item d-flex justify-content-between align-items-center">
                 {{ item.product.name }} × {{ item.quantity }}
                 <span>₵{{ '%.2f'|format(total) }}</span>
               </li>
             {% endfor %}
             <li class="list-group-item d-flex justify-content-between">
+              <span><strong>Total Items</strong></span>
+              <span><strong>{{ ns.total_items }}</strong></span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
               <strong>Total</strong>
-              <strong class="text-success">₵{{ '%.2f'|format(grand_total) }}</strong>
+              <strong class="text-success">₵{{ '%.2f'|format(ns.grand_total) }}</strong>
             </li>
           </ul>
 
-          <!-- Payment options (placeholder for now) -->
+          <!-- Payment options -->
           <div class="mb-3">
             <label class="form-label">Payment Method</label>
             <select class="form-select" name="payment_method" required>

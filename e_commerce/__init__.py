@@ -44,12 +44,14 @@ def create_app():
     from .routes.api_routes import api_bp
     from .routes.main_routes import main_bp
     from .routes.cart_routes import cart_bp
+    from .routes.auth_routes import auth_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(api_bp)
     app.register_blueprint(cart_bp)
+    app.register_blueprint(auth_bp)
 
-    # 🛒 Cart Totals
+    # Cart Totals
     @app.context_processor
     def cart_info():
         cart = session.get('cart', {})

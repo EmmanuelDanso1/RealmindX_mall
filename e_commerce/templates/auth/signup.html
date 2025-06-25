@@ -1,0 +1,40 @@
+{% extends "index.html"  %}
+
+{% block content %}
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow-lg p-4">
+                    <h2 class="text-center mb-4">Create an Account</h2>
+                    <form method="POST">
+                        {{ form.hidden_tag() }}  <!-- Ensure CSRF token is included -->
+                        
+                        <div>
+                            <label>Full Name</label>
+                            {{ form.username(class="form-control", placeholder="Enter username") }}
+                        </div>
+                        
+                        <div>
+                            <label>Email</label>
+                            {{ form.email(class="form-control", placeholder="Enter email") }}
+                        </div>
+                        
+                        <div>
+                            <label>Password</label>
+                            {{ form.password(class="form-control", placeholder="Enter password") }}
+                        </div>
+                        
+                        <div>
+                            <label>Confirm Password</label>
+                            {{ form.confirm_password(class="form-control", placeholder="Confirm password") }}
+                        </div><br>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                    <a href="{{ url_for('auth.login') }}" style="text-decoration: none;">Already have an account? Login</a>
+                </div>
+            </div>
+        </div>
+        
+    </div><br>
+    
+{% endblock %}

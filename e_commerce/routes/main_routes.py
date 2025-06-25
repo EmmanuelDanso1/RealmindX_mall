@@ -126,6 +126,12 @@ def search():
         categories=categories
     )
 
+#  order successful
+@main_bp.route('/order-success')
+@login_required
+def order_success():
+    return render_template('order_success.html')
+
 # autocomplete text
 @main_bp.route('/autocomplete')
 def autocomplete():

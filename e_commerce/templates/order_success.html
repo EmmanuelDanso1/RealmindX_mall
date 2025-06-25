@@ -1,0 +1,14 @@
+<!-- templates/order_success.html -->
+{% extends "index.html" %}
+{% block title %}Order Successful{% endblock %}
+
+{% block content %}
+<div class="container my-5 text-center">
+  <div class="alert alert-success">
+    <h2 class="mb-3">🎉 Thank you for your order!</h2>
+    <p>Your payment was successful and your order has been placed.</p>
+  </div>
+
+  <a href="{{ url_for('main.home') }}" class="btn btn-outline-dark mt-3">Continue Shopping</a>
+</div>
+{% endblock %}
