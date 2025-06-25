@@ -1,6 +1,6 @@
 from flask import request, jsonify, Blueprint, current_app
 from werkzeug.utils import secure_filename
-from e_commerce.models import Product
+from e_commerce.models import Product, Category
 from e_commerce import db
 import os
 import traceback
@@ -17,19 +17,32 @@ def receive_product():
 
     data = request.json
     try:
+        category_name = data.get('category', '').strip().title()
+        if not category_name:
+            return jsonify({'error': 'Category is required'}), 400
+
+        # ✅ Find or create category
+        category = Category.query.filter_by(name=category_name).first()
+        if not category:
+            category = Category(name=category_name)
+            db.session.add(category)
+            db.session.commit()
+
+        # ✅ Save product with category_id
         product = Product(
             name=data['name'],
             description=data['description'],
             price=data['price'],
             image_filename=data['image_filename'],
-            in_stock=data.get('in_stock', True)
+            in_stock=data.get('in_stock', True),
+            category_id=category.id
         )
         db.session.add(product)
         db.session.commit()
         return jsonify({'message': 'Product synced', 'id': product.id}), 201
+
     except Exception as e:
         return jsonify({'error': str(e)}), 400
-
 
 @api_bp.route('/api/upload-image', methods=['POST'])
 def upload_image():

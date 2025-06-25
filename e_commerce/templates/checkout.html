@@ -6,7 +6,7 @@
   <h2 class="mb-4">Checkout</h2>
 
   {% if cart %}
-    <form method="POST" action="{{ url_for('main.process_checkout') }}">
+    <form method="POST" action="{{ url_for('cart.checkout') }}">
       <div class="row">
         <!-- Billing Info -->
         <div class="col-md-6">

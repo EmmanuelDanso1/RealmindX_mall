@@ -21,14 +21,17 @@
       </button>
       <form method="GET" action="{{ url_for('main.search') }}" class="d-flex mx-auto w-50">
         <input class="form-control me-2" type="search" name="q" id="search-box" placeholder="Search for Products" autocomplete="off">
+        
         <select name="category" class="form-select me-2">
           <option value="">All Categories</option>
           {% for cat in categories %}
           <option value="{{ cat.id }}">{{ cat.name }}</option>
           {% endfor %}
         </select>
+
         <button class="btn text-white" style="background-color: #0C2E60;">Search</button>
       </form>
+
       <!-- Suggestion Box -->
       <ul id="suggestions" class="list-group position-absolute mt-1 z-3 w-50" style="max-height: 200px; overflow-y: auto; display: none;"></ul>
 

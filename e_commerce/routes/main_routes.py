@@ -99,15 +99,17 @@ def confirm_subscription(token):
 @main_bp.route('/search')
 def search():
     query = request.args.get('q', '')
-    category_id = request.args.get('category')
+    category_id = request.args.get('category', type=int)
     min_price = request.args.get('min_price', type=float)
     max_price = request.args.get('max_price', type=float)
     in_stock = request.args.get('in_stock') == '1'
 
     products = Product.query.filter(Product.name.ilike(f'%{query}%'))
 
+    # ✅ Filter by category
     if category_id:
         products = products.filter_by(category_id=category_id)
+
     if min_price is not None:
         products = products.filter(Product.price >= min_price)
     if max_price is not None:
@@ -115,10 +117,14 @@ def search():
     if in_stock:
         products = products.filter_by(in_stock=True)
 
-    categories = Category.query.all()  # <-- Ensure this is imported and passed
+    categories = Category.query.order_by(Category.name).all()
 
-    return render_template('search_results.html', products=products.all(), query=query, categories=categories)
-
+    return render_template(
+        'search_results.html',
+        products=products.all(),
+        query=query,
+        categories=categories
+    )
 
 # autocomplete text
 @main_bp.route('/autocomplete')

@@ -25,7 +25,7 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
-    login_manager.login_view = 'auth.login'  # Route name for login
+    login_manager.login_view = 'auth.login'
     mail.init_app(app)
 
     # Import User after db is initialized
@@ -33,14 +33,12 @@ def create_app():
 
     @login_manager.user_loader
     def load_user(user_id):
-        # Skip admin-style IDs like 'admin:1'
         if isinstance(user_id, str) and user_id.startswith("admin:"):
             return None
         try:
             return User.query.get(int(user_id))
         except ValueError:
             return None
-
 
     # Register blueprints
     from .routes.api_routes import api_bp
@@ -50,13 +48,22 @@ def create_app():
     app.register_blueprint(main_bp)
     app.register_blueprint(api_bp)
     app.register_blueprint(cart_bp)
-    
-    # cart total
+
+    # 🛒 Cart Totals
     @app.context_processor
     def cart_info():
         cart = session.get('cart', {})
         total_items = sum(item['quantity'] for item in cart.values())
         total_amount = sum(item['price'] * item['quantity'] for item in cart.values())
         return dict(cart_item_count=total_items, cart_total=total_amount)
-    
+
+    # Inject categories globally (for navbar dropdown)
+    from e_commerce.models import Category
+
+    @app.context_processor
+    def inject_categories():
+        return {
+            'categories': Category.query.order_by(Category.name).all()
+        }
+
     return app
