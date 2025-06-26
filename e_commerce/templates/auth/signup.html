@@ -1,40 +1,77 @@
-{% extends "index.html"  %}
-
+{% extends 'index.html' %}
+{% block title %}Product Detail{% endblock %}
 {% block content %}
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card shadow-lg p-4">
-                    <h2 class="text-center mb-4">Create an Account</h2>
-                    <form method="POST">
-                        {{ form.hidden_tag() }}  <!-- Ensure CSRF token is included -->
-                        
-                        <div>
-                            <label>Full Name</label>
-                            {{ form.username(class="form-control", placeholder="Enter username") }}
-                        </div>
-                        
-                        <div>
-                            <label>Email</label>
-                            {{ form.email(class="form-control", placeholder="Enter email") }}
-                        </div>
-                        
-                        <div>
-                            <label>Password</label>
-                            {{ form.password(class="form-control", placeholder="Enter password") }}
-                        </div>
-                        
-                        <div>
-                            <label>Confirm Password</label>
-                            {{ form.confirm_password(class="form-control", placeholder="Confirm password") }}
-                        </div><br>
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                    </form>
-                    <a href="{{ url_for('auth.login') }}" style="text-decoration: none;">Already have an account? Login</a>
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-6">
+      <img src="{{ url_for('static', filename='uploads/' + product.image) }}" alt="{{ product.name }}" class="img-fluid">
+    </div>
+    <div class="col-md-6">
+      <h2>{{ product.name }}</h2>
+      <p class="text-muted">{{ product.description }}</p>
+      <h4 class="text-primary">€{{ '%.2f' % product.price }}</h4>
+      {% if product.in_stock %}
+        <span class="badge bg-success">In Stock</span>
+      {% else %}
+        <span class="badge bg-danger">Out of Stock</span>
+      {% endif %}
+
+      <!-- Average Rating -->
+      <div class="mt-4">
+        <h5>Ratings</h5>
+        {% if product.ratings %}
+          {% set avg_rating = (product.ratings | map(attribute='rating') | list | sum) / (product.ratings|length) %}
+          <p class="text-warning">
+            {% for i in range(1, 6) %}
+              {% if i <= avg_rating %}
+                <span>&#9733;</span>
+              {% else %}
+                <span class="text-secondary">&#9733;</span>
+              {% endif %}
+            {% endfor %}
+            <small>({{ '%.1f' % avg_rating }} / 5 based on {{ product.ratings|length }} reviews)</small>
+          </p>
+        {% else %}
+          <p class="text-muted">No ratings yet</p>
+        {% endif %}
+
+        <!-- User Rating -->
+        {% if current_user.is_authenticated %}
+          {% if user_rating %}
+            <p class="text-muted">You rated this product: ⭐ {{ user_rating.rating }}/5</p>
+          {% else %}
+            {% if has_purchased %}
+              <form method="POST" action="{{ url_for('main.rate_product', product_id=product.id) }}">
+                <div class="rating mb-2">
+                  {% for i in range(5, 0, -1) %}
+                    <input type="radio" name="rating" value="{{ i }}" id="star{{ i }}">
+                    <label for="star{{ i }}">★</label>
+                  {% endfor %}
                 </div>
-            </div>
-        </div>
-        
-    </div><br>
-    
+                <button type="submit" class="btn btn-sm btn-primary">Submit</button>
+              </form>
+            {% else %}
+              <p class="text-danger">You can only rate products you've purchased.</p>
+            {% endif %}
+          {% endif %}
+        {% else %}
+          <p><a href="{{ url_for('auth.login') }}">Log in</a> to rate this product.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+<style>
+.rating label {
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+.rating input {
+  display: none;
+}
+.rating label:hover,
+.rating input:checked ~ label {
+  color: gold;
+}
+</style>
 {% endblock %}

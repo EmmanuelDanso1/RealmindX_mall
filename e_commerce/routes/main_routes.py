@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, flash, redirect, url_for,
 from flask_login import login_required, current_user
 from flask_mail import Mail,Message
 from e_commerce import db, mail
-from e_commerce.models import Product, ProductRating, NewsletterSubscriber, Category
+from e_commerce.models import Product, ProductRating, NewsletterSubscriber, Category, Order, OrderItem
 from e_commerce.utils.token import generate_verification_token, confirm_verification_token
 
 main_bp = Blueprint('main', __name__)
@@ -127,10 +127,23 @@ def autocomplete():
 @login_required
 def rate_product(product_id):
     product = Product.query.get_or_404(product_id)
+
+    # Check if the current user has purchased the product
+    has_purchased = OrderItem.query.join(Order).filter(
+        Order.user_id == current_user.id,
+        OrderItem.product_id == product.id
+    ).first()
+
+    if not has_purchased:
+        flash("You can only rate products you’ve purchased.", "warning")
+        return redirect(url_for('main.product_detail', product_id=product.id))
+
     rating_value = int(request.form['rating'])
 
     # Check if the user has already rated
-    existing_rating = ProductRating.query.filter_by(user_id=current_user.id, product_id=product.id).first()
+    existing_rating = ProductRating.query.filter_by(
+        user_id=current_user.id, product_id=product.id
+    ).first()
 
     if existing_rating:
         existing_rating.rating = rating_value
@@ -146,6 +159,7 @@ def rate_product(product_id):
     flash('Thanks for your rating!', 'success')
     return redirect(url_for('main.product_detail', product_id=product.id))
 
+
 # rating
 @main_bp.route('/product/<int:product_id>')
 def product_detail(product_id):
@@ -154,3 +168,19 @@ def product_detail(product_id):
     if current_user.is_authenticated:
         user_rating = ProductRating.query.filter_by(user_id=current_user.id, product_id=product_id).first()
     return render_template('product_detail.html', product=product, user_rating=user_rating)
+
+# see ordered products
+@main_bp.route('/my-products')
+@login_required
+def purchased_products():
+    # Get products that the user has ordered
+    purchased_product_ids = db.session.query(OrderItem.product_id).join(Order).filter(
+        Order.user_id == current_user.id
+    ).distinct().all()
+
+    # Flatten list of tuples into a list
+    product_ids = [pid for (pid,) in purchased_product_ids]
+
+    products = Product.query.filter(Product.id.in_(product_ids)).all()
+
+    return render_template('my_products.html', products=products)
