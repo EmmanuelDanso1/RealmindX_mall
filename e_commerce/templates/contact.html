@@ -1,0 +1,48 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body p-5">
+                    <h2 class="text-center fw-bold mb-4">Get in Touch</h2>
+                    <p class="text-center text-muted mb-4">We'd love to hear from you. Fill out the form below to send us a message.</p>
+
+                    <form id="contactForm" method="POST" action="{{ url_for('main.submit_contact') }}">
+                        <!-- Full Name -->
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="name" name="name" placeholder="Full Name" required>
+                            <label for="name">Full Name</label>
+                        </div>
+
+                        <!-- Email Address -->
+                        <div class="form-floating mb-3">
+                            <input type="email" class="form-control" id="email" name="email" placeholder="Email Address" required>
+                            <label for="email">Email Address</label>
+                        </div>
+
+                        <!-- Subject -->
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="subject" name="subject" placeholder="Subject" required>
+                            <label for="subject">Subject</label>
+                        </div>
+
+                        <!-- Message -->
+                        <div class="form-floating mb-4">
+                            <textarea class="form-control" placeholder="Your message here..." id="message" name="message" style="height: 150px" required></textarea>
+                            <label for="message">Message</label>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-3">Send Message</button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
