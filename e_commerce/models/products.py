@@ -18,6 +18,9 @@ class Product(db.Model):
     # Category relationship
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
     category = db.relationship('Category', back_populates='products')
+    
+    # Order relationship
+    order_items = db.relationship('OrderItem', backref='product', lazy=True)
     # Average rating property
     @property
     def average_rating(self):

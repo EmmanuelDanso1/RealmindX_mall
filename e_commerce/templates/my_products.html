@@ -6,10 +6,11 @@
     {% for product in products %}
       <div class="col-md-4">
         <div class="card mb-4 shadow-sm">
-          <img src="{{ url_for('static', filename='uploads/' + product.image) }}" class="card-img-top" alt="{{ product.name }}">
+          <img src="{{ url_for('static', filename='uploads/' + product.image_filename) }}" class="card-img-top" alt="{{ product.name }}">
           <div class="card-body">
             <h5>{{ product.name }}</h5>
             <p>{{ product.description }}</p>
+            <h6 class="text-primary">GH₵{{ '%.2f' % product.price }}</h6>
             <a href="{{ url_for('main.product_detail', product_id=product.id) }}" class="btn btn-outline-primary btn-sm">Rate Product</a>
           </div>
         </div>

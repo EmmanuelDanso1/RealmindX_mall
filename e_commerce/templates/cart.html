@@ -11,9 +11,9 @@
         <thead class="table-dark">
           <tr>
             <th>Product</th>
-            <th>Price (₵)</th>
+            <th>Price (GH₵)</th>
             <th>Quantity</th>
-            <th>Total (₵)</th>
+            <th>Total (GH₵)</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -31,9 +31,9 @@
                   <span>{{ item.product.name }}</span>
                 </div>
               </td>
-              <td>₵{{ '%.2f'|format(item.product.price) }}</td>
+              <td>GH₵{{ '%.2f'|format(item.product.price) }}</td>
               <td>{{ item.quantity }}</td>
-              <td>₵{{ '%.2f'|format(total) }}</td>
+              <td>GH₵{{ '%.2f'|format(total) }}</td>
               <td>
                 <!-- Trigger Modal -->
                 <button class="btn btn-sm btn-danger"
@@ -54,7 +54,7 @@
           </tr>
           <tr class="table-light">
             <td colspan="3" class="text-end fw-bold">Grand Total:</td>
-            <td colspan="2" class="fw-bold text-success">₵{{ '%.2f'|format(ns.grand_total) }}</td>
+            <td colspan="2" class="fw-bold text-success">GH₵{{ '%.2f'|format(ns.grand_total) }}</td>
           </tr>
         </tfoot>
       </table>

@@ -96,7 +96,7 @@ def checkout():
 
             data = {
                 "email": email,
-                "amount": int(grand_total * 100),  # Convert to kobo
+                "amount": int(grand_total * 100),  # Convert to cedis
                 "metadata": {
                     "full_name": full_name,
                     "address": address,
@@ -115,7 +115,6 @@ def checkout():
 
             initialize_url = 'https://api.paystack.co/transaction/initialize'
 
-            # ✅ Error-handled Paystack request
             try:
                 response = requests.post(initialize_url, json=data, headers=headers, timeout=10)
                 response.raise_for_status()
@@ -135,13 +134,35 @@ def checkout():
                 return render_template("errors/general_error.html", error=str(e)), 500
 
         elif payment_method == 'cod':
-            # Save order logic can go here if needed
-            flash("Order placed. You will pay on delivery.", "success")
+            # Save order and order items
+            order = Order(
+                user_id=current_user.id,
+                full_name=full_name,
+                email=email,
+                address=address,
+                total_amount=grand_total,
+                payment_method='cod',
+                status='cod'
+            )
+            db.session.add(order)
+            db.session.flush()  # To get order.id before commit
+
+            for item in items:
+                order_item = OrderItem(
+                    order_id=order.id,
+                    product_id=item['product'].id,
+                    quantity=item['quantity'],
+                    price=item['product'].price
+                )
+                db.session.add(order_item)
+
+            db.session.commit()
+
+            flash("Order placed successfully. You will pay on delivery.", "success")
             session.pop('cart', None)
             return redirect(url_for('main.order_success'))
 
     return render_template('checkout.html', cart=items, total=grand_total)
-
 
 # payment callback
 @cart_bp.route('/payment/callback')
@@ -225,6 +246,8 @@ def get_cart_items_for_user(user_id=None):
             })
 
     return items
+
+# Add quantity of products to be purchased
 @cart_bp.route('/add/<int:product_id>', methods=['GET', 'POST'])
 def add_quantity(product_id):
     product = Product.query.get_or_404(product_id)

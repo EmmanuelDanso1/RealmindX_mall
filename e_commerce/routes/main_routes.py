@@ -170,17 +170,15 @@ def product_detail(product_id):
     return render_template('product_detail.html', product=product, user_rating=user_rating)
 
 # see ordered products
-@main_bp.route('/my-products')
+@main_bp.route('/my-products') 
 @login_required
 def purchased_products():
-    # Get products that the user has ordered
-    purchased_product_ids = db.session.query(OrderItem.product_id).join(Order).filter(
-        Order.user_id == current_user.id
-    ).distinct().all()
-
-    # Flatten list of tuples into a list
-    product_ids = [pid for (pid,) in purchased_product_ids]
-
-    products = Product.query.filter(Product.id.in_(product_ids)).all()
-
-    return render_template('my_products.html', products=products)
+    purchased_items = (
+        db.session.query(Product)
+        .join(OrderItem)
+        .join(Order)
+        .filter(Order.user_id == current_user.id)
+        .distinct()
+        .all()
+    )
+    return render_template('my_products.html', products=purchased_items)

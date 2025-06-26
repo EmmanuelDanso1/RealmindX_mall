@@ -4,12 +4,12 @@
 <div class="container mt-5">
   <div class="row">
     <div class="col-md-6">
-      <img src="{{ url_for('static', filename='uploads/' + product.image) }}" alt="{{ product.name }}" class="img-fluid">
+      <img src="{{ url_for('static', filename='uploads/' + product.image_filename) }}" alt="{{ product.name }}" class="img-fluid">
     </div>
     <div class="col-md-6">
       <h2>{{ product.name }}</h2>
       <p class="text-muted">{{ product.description }}</p>
-      <h4 class="text-primary">€{{ '%.2f' % product.price }}</h4>
+      <h4 class="text-primary">GH₵{{ '%.2f' % product.price }}</h4>
       {% if product.in_stock %}
         <span class="badge bg-success">In Stock</span>
       {% else %}
@@ -55,7 +55,7 @@
         {% endif %}
       </div>
     </div>
-  </div>
+  </div><br>
 </div>
 <style>
 .rating label {
