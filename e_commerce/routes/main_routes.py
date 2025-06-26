@@ -16,23 +16,6 @@ def home():
 def contact():
     return render_template("contact.html")
 
-# Product rating
-@main_bp.route('/rate/<int:product_id>', methods=['POST'])
-@login_required
-def rate_product(product_id):
-    rating_value = int(request.form['rating'])
-    existing = ProductRating.query.filter_by(user_id=current_user.id, product_id=product_id).first()
-
-    if existing:
-        existing.rating = rating_value
-    else:
-        new_rating = ProductRating(user_id=current_user.id, product_id=product_id, rating=rating_value)
-        db.session.add(new_rating)
-
-    db.session.commit()
-    flash("Rating submitted!", "success")
-    return redirect(url_for('main.home'))
-
 @main_bp.route('/product/<int:product_id>')
 def view_product(product_id):
     product = Product.query.get_or_404(product_id)
@@ -138,3 +121,36 @@ def autocomplete():
     term = request.args.get('term', '')
     results = Product.query.filter(Product.name.ilike(f"%{term}%")).limit(10).all()
     return jsonify([p.name for p in results])
+
+# product rating
+@main_bp.route('/product/<int:product_id>/rate', methods=['POST'])
+@login_required
+def rate_product(product_id):
+    product = Product.query.get_or_404(product_id)
+    rating_value = int(request.form['rating'])
+
+    # Check if the user has already rated
+    existing_rating = ProductRating.query.filter_by(user_id=current_user.id, product_id=product.id).first()
+
+    if existing_rating:
+        existing_rating.rating = rating_value
+    else:
+        new_rating = ProductRating(
+            rating=rating_value,
+            user_id=current_user.id,
+            product_id=product.id
+        )
+        db.session.add(new_rating)
+
+    db.session.commit()
+    flash('Thanks for your rating!', 'success')
+    return redirect(url_for('main.product_detail', product_id=product.id))
+
+# rating
+@main_bp.route('/product/<int:product_id>')
+def product_detail(product_id):
+    product = Product.query.get_or_404(product_id)
+    user_rating = None
+    if current_user.is_authenticated:
+        user_rating = ProductRating.query.filter_by(user_id=current_user.id, product_id=product_id).first()
+    return render_template('product_detail.html', product=product, user_rating=user_rating)

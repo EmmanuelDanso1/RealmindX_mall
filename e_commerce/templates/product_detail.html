@@ -1,31 +1,39 @@
 <div class="mt-4">
   <h5>Ratings</h5>
 
-  <!-- ⭐ Show average rating -->
-  <p class="text-warning">
-    ⭐ {{ product.average_rating }}/5
-    <small>({{ product.ratings|length }} reviews)</small>
-  </p>
+  <!--  Show average rating -->
+  {% if product.ratings %}
+    {% set avg_rating = (product.ratings | map(attribute='rating') | list | sum) / product.ratings|length %}
+    <p class="text-warning">
+      {% for i in range(1, 6) %}
+        {% if i <= avg_rating %}
+          <span>&#9733;</span>
+        {% else %}
+          <span class="text-secondary">&#9733;</span>
+        {% endif %}
+      {% endfor %}
+      <small>({{ '%.1f' % avg_rating }} / 5 based on {{ product.ratings|length }} reviews)</small>
+    </p>
+  {% else %}
+    <p class="text-muted">No ratings yet</p>
+  {% endif %}
 
+  <!-- ⭐ Rating submission -->
   {% if current_user.is_authenticated %}
     {% if user_rating %}
-      <!-- 🚫 Already rated -->
       <p class="text-muted">You rated this product: ⭐ {{ user_rating.rating }}/5</p>
     {% else %}
-      <!-- ✅ Rating form -->
       <form method="POST" action="{{ url_for('main.rate_product', product_id=product.id) }}">
-        <label for="rating">Rate this product:</label>
-        <select name="rating" id="rating" class="form-select w-auto d-inline-block mx-2" required>
-          <option value="">Choose</option>
-          {% for i in range(1, 6) %}
-          <option value="{{ i }}">{{ i }}</option>
+        <div class="rating mb-2">
+          {% for i in range(5, 0, -1) %}
+            <input type="radio" name="rating" value="{{ i }}" id="star{{ i }}">
+            <label for="star{{ i }}">&#9733;</label>
           {% endfor %}
-        </select>
+        </div>
         <button type="submit" class="btn btn-sm btn-primary">Submit</button>
       </form>
     {% endif %}
   {% else %}
-  <!-- add authentication to login -->
-    <p><a href="#">Log in</a> to rate this product.</p>
+    <p><a href="{{ url_for('auth.login') }}">Log in</a> to rate this product.</p>
   {% endif %}
 </div>
