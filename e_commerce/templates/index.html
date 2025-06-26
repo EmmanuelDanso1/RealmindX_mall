@@ -39,7 +39,6 @@
         <a href="#" class="text-dark me-3"><i class="fas fa-heart"></i></a>
         <a href="{{ url_for('cart.view_cart') }}" class="text-dark position-relative">
           <i class="fas fa-shopping-cart"></i>
-          ₵{{ '%.2f'|format(cart_total or 0) }}
           {% if cart_item_count %}
             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
               {{ cart_item_count }}

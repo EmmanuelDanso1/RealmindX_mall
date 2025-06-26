@@ -225,3 +225,32 @@ def get_cart_items_for_user(user_id=None):
             })
 
     return items
+@cart_bp.route('/add/<int:product_id>', methods=['GET', 'POST'])
+def add_quantity(product_id):
+    product = Product.query.get_or_404(product_id)
+
+    if request.method == 'POST':
+        quantity = int(request.form.get('quantity', 1))
+
+        cart = session.get('cart', {})  # dictionary: product_id -> item data
+        product_id_str = str(product.id)
+
+        # Check if product already in cart
+        if product_id_str in cart:
+            cart[product_id_str]['quantity'] += quantity
+            cart[product_id_str]['total'] = round(cart[product_id_str]['quantity'] * cart[product_id_str]['price'], 2)
+        else:
+            cart[product_id_str] = {
+                'product_id': product.id,
+                'name': product.name,
+                'price': float(product.price),
+                'quantity': quantity,
+                'total': round(float(product.price) * quantity, 2)
+            }
+
+        session['cart'] = cart
+        flash('Item added to cart successfully.', 'success')
+        return redirect(url_for('cart.view_cart'))
+
+    return render_template('cart/add_quantity.html', product=product)
+
