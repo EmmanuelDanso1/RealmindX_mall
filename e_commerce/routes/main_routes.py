@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from flask_mail import Mail,Message
 import os
 from e_commerce import db, mail
-from e_commerce.models import Product, ProductRating, NewsletterSubscriber, Category, Order, OrderItem
+from e_commerce.models import Product, ProductRating, NewsletterSubscriber, Category, Order, OrderItem, InfoDocument
 from e_commerce.utils.token import generate_verification_token, confirm_verification_token
 
 main_bp = Blueprint('main', __name__)
@@ -109,6 +109,31 @@ def search():
         query=query,
         categories=categories
     )
+
+# purchased order deleted
+@main_bp.route('/delete-ordered-product/<int:product_id>', methods=['POST'])
+@login_required
+def delete_ordered_product(product_id):
+    order_item = OrderItem.query.join(Order).filter(
+        Order.user_id == current_user.id,
+        OrderItem.product_id == product_id
+    ).first()
+
+    if not order_item:
+        flash("Ordered product not found or unauthorized action.", "danger")
+        return redirect(url_for('main.product_detail', product_id=product_id))
+
+    try:
+        db.session.delete(order_item)
+        db.session.commit()
+        flash("Product removed from your purchases.", "success")
+    except Exception as e:
+        db.session.rollback()
+        print(f"Delete error: {e}")
+        flash("An error occurred while deleting the product.", "danger")
+
+    return redirect(url_for('main.product_detail', product_id=product_id))
+
 
 #  order successful
 @main_bp.route('/order-success')
@@ -216,3 +241,31 @@ def submit_contact():
         flash("An error occurred while sending your message. Please try again later.", "danger")
 
     return redirect(url_for('main.contact'))
+
+# info
+@main_bp.route('/info')
+def info():
+    page = request.args.get('page', 1, type=int)
+    search_query = request.args.get('q', '').strip()
+    source_filter = request.args.get('source', '').strip()
+
+    query = InfoDocument.query
+
+    # Apply search filter
+    if search_query:
+        query = query.filter(InfoDocument.title.ilike(f"%{search_query}%"))
+
+    # Apply source filter
+    if source_filter:
+        query = query.filter(InfoDocument.source.ilike(f"%{source_filter}%"))
+
+    # Paginate (6 per page)
+    documents = query.order_by(InfoDocument.upload_date.desc()).paginate(page=page, per_page=9)
+
+    return render_template(
+        'info.html', 
+        documents=documents,
+        search_query=search_query,
+        source_filter=source_filter
+    )
+

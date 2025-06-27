@@ -39,6 +39,7 @@
 
       <div class="d-flex align-items-center">
         {% if not current_user.is_authenticated %}
+        <a href="{{ url_for('main.info') }}" class="btn btn-outline-primary me-3">Info</a>
         <a href="#" class="text-dark me-3"><i class="fas fa-heart"></i></a>
         <a href="{{ url_for('cart.view_cart') }}" class="text-dark position-relative me-3">
           <i class="fas fa-shopping-cart"></i>
