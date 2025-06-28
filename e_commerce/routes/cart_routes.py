@@ -60,9 +60,7 @@ def remove_from_cart(product_id):
     flash("Item removed from cart.", "info")
     return redirect(url_for('cart.view_cart'))
 
-# Checkout
-from flask import render_template  # Ensure this is imported if not already
-
+# check out
 @cart_bp.route('/cart/checkout', methods=['GET', 'POST'])
 @login_required
 def checkout():

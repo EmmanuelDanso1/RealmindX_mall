@@ -208,7 +208,12 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <!-- WhatsApp Floating Button -->
-  <a href="https://wa.me/233558099689" class="whatsapp-float" target="_blank">
+  <a href="https://wa.me/233558099689" class="whatsapp-float" target="_blank" style="
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  ">
     <img src="{{ url_for('static', filename='images/whatsapp.png') }}" alt="WhatsApp" width="60">
   </a>
 </body>
