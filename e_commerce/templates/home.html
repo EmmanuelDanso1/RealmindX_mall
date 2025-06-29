@@ -27,23 +27,23 @@
             </div>
 
             <div class="card-body">
-              <h5 class="card-title">{{ product.name }}</h5>
-              <p class="card-text">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
+              <h5 class="card-title" style="color: #0C2E60;">{{ product.name }}</h5>
+              <p class="card-text" style="color: #0C2E60;">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
 
               {% if product.author %}
-                <p class="mb-1"><strong>Author:</strong> {{ product.author }}</p>
+                <p class="mb-1"><strong style="color: #0C2E60;">Author:</strong> {{ product.author }}</p>
               {% endif %}
               {% if product.subject %}
-                <p class="mb-1"><strong>Subject:</strong> {{ product.subject }}</p>
+                <p class="mb-1"><strong style="color: #0C2E60;">Subject:</strong> {{ product.subject }}</p>
               {% endif %}
               {% if product.grade %}
-                <p class="mb-1"><strong>Grade:</strong> {{ product.grade }}</p>
+                <p class="mb-1"><strong style="color: #0C2E60;">Grade:</strong> {{ product.grade }}</p>
               {% endif %}
               {% if product.level %}
-                <p class="mb-1"><strong>Level:</strong> {{ product.level }}</p>
+                <p class="mb-1"><strong style="color: #0C2E60;">Level:</strong> {{ product.level }}</p>
               {% endif %}
               {% if product.brand %}
-                <p class="mb-1"><strong>Brand:</strong> {{ product.brand }}</p>
+                <p class="mb-1"><strong style="color: #0C2E60;">Brand:</strong> {{ product.brand }}</p>
               {% endif %}
 
               <p class="text-primary fw-bold">GH₵{{ '%.2f'|format(product.price) }}</p>
