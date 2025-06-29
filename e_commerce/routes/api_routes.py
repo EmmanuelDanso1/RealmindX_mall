@@ -4,11 +4,19 @@ from e_commerce.models import Product, Category, InfoDocument
 from e_commerce import db
 import os
 from e_commerce.utils.helpers import allowed_file, allowed_image_file
+from flask import send_from_directory
 import traceback
 
 API_TOKEN = os.getenv("API_TOKEN")
 
 api_bp = Blueprint('api', __name__)
+
+# serve uploaded file
+
+
+@api_bp.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)
 
 @api_bp.route('/api/products', methods=['POST'])
 def receive_product():

@@ -7,11 +7,11 @@ class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key')
 
     # SQLite DB absolute path
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(BASE_DIR, 'realmindmall.db')
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(BASE_DIR, 'realmindxgh_mall.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Directory for product image uploads
-    UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
+    UPLOAD_FOLDER = os.path.join(BASE_DIR, 'e_commerce', 'static', 'uploads')
 
     # Token for authenticating product sync API from learning platform
     API_TOKEN = os.getenv('API_TOKEN', 'default-token')

@@ -20,6 +20,9 @@ def create_app():
 
     # Load config
     app.config.from_object('config.Config')
+    
+    # Ensure upload folder exists
+    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
     # Initialize extensions
     db.init_app(app)
