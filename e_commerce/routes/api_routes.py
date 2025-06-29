@@ -29,21 +29,65 @@ def receive_product():
             db.session.add(category)
             db.session.commit()
 
-        # ✅ Save product with category_id
+        # ✅ Create product with new metadata fields
         product = Product(
             name=data['name'],
             description=data['description'],
             price=data['price'],
-            image_filename=data['image_filename'],
+            image_filename=data.get('image_filename'),
             in_stock=data.get('in_stock', True),
-            category_id=category.id
+            category_id=category.id,
+            author=data.get('author'),
+            brand=data.get('brand'),
+            grade=data.get('grade'),
+            level=data.get('level'),
+            subject=data.get('subject')
         )
+
         db.session.add(product)
         db.session.commit()
+
         return jsonify({'message': 'Product synced', 'id': product.id}), 201
 
     except Exception as e:
         return jsonify({'error': str(e)}), 400
+
+# pagination
+@api_bp.route('/api/products', methods=['GET'])
+def get_products():
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)  # default 10
+
+    query = Product.query.order_by(Product.date_created.desc())
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+
+    products_data = []
+    for product in pagination.items:
+        products_data.append({
+            'id': product.id,
+            'name': product.name,
+            'description': product.description,
+            'price': product.price,
+            'image_filename': product.image_filename,
+            'in_stock': product.in_stock,
+            'author': product.author,
+            'brand': product.brand,
+            'grade': product.grade,
+            'level': product.level,
+            'subject': product.subject,
+            'category': product.category.name if product.category else None,
+            'date_created': product.date_created.strftime('%Y-%m-%d %H:%M:%S')
+        })
+
+    return jsonify({
+        'products': products_data,
+        'total': pagination.total,
+        'pages': pagination.pages,
+        'current_page': pagination.page,
+        'per_page': pagination.per_page,
+        'has_next': pagination.has_next,
+        'has_prev': pagination.has_prev,
+    })
 
 @api_bp.route('/api/upload-image', methods=['POST'])
 def upload_image():
@@ -76,10 +120,30 @@ def update_product_api(product_id):
         product.price = data['price']
         product.in_stock = data.get('in_stock', True)
         product.image_filename = data.get('image_filename', product.image_filename)
+
+        # ✅ Optional fields
+        product.author = data.get('author')
+        product.brand = data.get('brand')
+        product.grade = data.get('grade')
+        product.level = data.get('level')
+        product.subject = data.get('subject')
+
+        # ✅ Handle category update (optional)
+        category_name = data.get('category', '').strip().title()
+        if category_name:
+            category = Category.query.filter_by(name=category_name).first()
+            if not category:
+                category = Category(name=category_name)
+                db.session.add(category)
+                db.session.commit()
+            product.category_id = category.id
+
         db.session.commit()
         return jsonify({'message': 'Product updated'}), 200
+
     except Exception as e:
         return jsonify({'error': str(e)}), 400
+
 
 
 # delete product
@@ -89,16 +153,14 @@ def delete_product_api(product_id):
     if not token or token != f"Bearer {API_TOKEN}":
         return jsonify({'error': 'Unauthorized'}), 401
 
-    product = Product.query.get(product_id)
-    if not product:
-        return jsonify({'error': 'Product not found'}), 404
+    product = Product.query.get_or_404(product_id)
 
     try:
         db.session.delete(product)
         db.session.commit()
-        return jsonify({'message': 'Product deleted'}), 200
+        return jsonify({'message': f'Product {product.name} deleted'}), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to delete product', 'details': str(e)}), 500
 
 # recieve  info from learning platform
 @api_bp.route('/api/info', methods=['POST'])

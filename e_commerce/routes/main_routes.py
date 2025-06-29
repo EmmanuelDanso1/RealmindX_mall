@@ -10,8 +10,17 @@ main_bp = Blueprint('main', __name__)
 
 @main_bp.route('/')
 def home():
-    products = Product.query.order_by(Product.date_created.desc()).all()
+    page = request.args.get('page', 1, type=int)
+    per_page = 12  # or any number you prefer
+
+    products = Product.query.order_by(Product.date_created.desc()).paginate(
+        page=page,
+        per_page=per_page,
+        error_out=False
+    )
+
     return render_template('home.html', products=products)
+
 
 @main_bp.route('/contact')
 def contact():
@@ -82,33 +91,53 @@ def confirm_subscription(token):
 # search for product
 @main_bp.route('/search')
 def search():
-    query = request.args.get('q', '')
+    query = request.args.get('q', '').strip()
     category_id = request.args.get('category', type=int)
     min_price = request.args.get('min_price', type=float)
     max_price = request.args.get('max_price', type=float)
     in_stock = request.args.get('in_stock') == '1'
+    page = request.args.get('page', 1, type=int)
+    per_page = 6  # You can customize or make it dynamic
 
-    products = Product.query.filter(Product.name.ilike(f'%{query}%'))
+    # Base query with multi-field keyword search
+    products_query = Product.query.filter(
+        db.or_(
+            Product.name.ilike(f"%{query}%"),
+            Product.author.ilike(f"%{query}%"),
+            Product.brand.ilike(f"%{query}%"),
+            Product.subject.ilike(f"%{query}%"),
+            Product.grade.ilike(f"%{query}"),
+            Product.level.ilike(f"%{query}")
+        )
+    )
 
-    # ✅ Filter by category
+    # Apply optional filters
     if category_id:
-        products = products.filter_by(category_id=category_id)
-
+        products_query = products_query.filter_by(category_id=category_id)
     if min_price is not None:
-        products = products.filter(Product.price >= min_price)
+        products_query = products_query.filter(Product.price >= min_price)
     if max_price is not None:
-        products = products.filter(Product.price <= max_price)
+        products_query = products_query.filter(Product.price <= max_price)
     if in_stock:
-        products = products.filter_by(in_stock=True)
+        products_query = products_query.filter_by(in_stock=True)
 
+    # Pagination
+    products = products_query.order_by(Product.date_created.desc()).paginate(
+        page=page,
+        per_page=per_page,
+        error_out=False
+    )
+
+    # Load categories for filtering UI
     categories = Category.query.order_by(Category.name).all()
 
     return render_template(
         'search_results.html',
-        products=products.all(),
+        products=products,
         query=query,
         categories=categories
     )
+
 
 # purchased order deleted
 @main_bp.route('/delete-ordered-product/<int:product_id>', methods=['POST'])

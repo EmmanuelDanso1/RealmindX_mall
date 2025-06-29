@@ -12,6 +12,13 @@ class Product(db.Model):
     in_stock = db.Column(db.Boolean, default=True)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
+    # ✅ New Optional Metadata Fields
+    author = db.Column(db.String(120), nullable=True)
+    brand = db.Column(db.String(120), nullable=True)
+    grade = db.Column(db.String(50), nullable=True)
+    level = db.Column(db.String(50), nullable=True)
+    subject = db.Column(db.String(100), nullable=True)
+
     # Ratings relationship
     ratings = db.relationship('ProductRating', back_populates='product', lazy=True)
 
@@ -21,6 +28,7 @@ class Product(db.Model):
     
     # Order relationship
     order_items = db.relationship('OrderItem', backref='product', lazy=True)
+
     # Average rating property
     @property
     def average_rating(self):

@@ -1,8 +1,8 @@
-"""new migration
+"""updated the database
 
-Revision ID: f80e2c75a64a
+Revision ID: 83af30930bf0
 Revises: 
-Create Date: 2025-06-27 21:22:33.102914
+Create Date: 2025-06-29 18:34:22.123988
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'f80e2c75a64a'
+revision = '83af30930bf0'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -72,6 +72,11 @@ def upgrade():
     sa.Column('image_filename', sa.String(length=120), nullable=True),
     sa.Column('in_stock', sa.Boolean(), nullable=True),
     sa.Column('date_created', sa.DateTime(), nullable=True),
+    sa.Column('author', sa.String(length=120), nullable=True),
+    sa.Column('brand', sa.String(length=120), nullable=True),
+    sa.Column('grade', sa.String(length=50), nullable=True),
+    sa.Column('level', sa.String(length=50), nullable=True),
+    sa.Column('subject', sa.String(length=100), nullable=True),
     sa.Column('category_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['category_id'], ['category.id'], ),
     sa.PrimaryKeyConstraint('id')

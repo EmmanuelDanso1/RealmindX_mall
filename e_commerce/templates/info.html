@@ -1,18 +1,15 @@
 {% extends "index.html" %}
 {% block content %}
 <div class="container py-5">
-    <h2 class="mb-4 text-center">Curriculum & Exam Info</h2>
+    <h2 class="mb-4 text-center">Curriculum, Exam Update Info & Relevant Educational Documents </h2>
 
     <!-- Search + filter form -->
     <form method="GET" class="row mb-4">
-        <div class="col-md-4 mb-2">
+        <div class="col-md-8 mb-2">
             <input type="text" name="q" class="form-control" placeholder="Search by title..." value="{{ search_query }}">
         </div>
-        <div class="col-md-4 mb-2">
-            <input type="text" name="source" class="form-control" placeholder="Filter by source..." value="{{ source_filter }}">
-        </div>
         <div class="col-md-4 mb-2 d-grid">
-            <button type="submit" class="btn btn-primary">Search / Filter</button>
+            <button type="submit" class="btn btn-primary">Search</button>
         </div>
     </form>
 
