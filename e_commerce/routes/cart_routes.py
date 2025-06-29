@@ -94,7 +94,7 @@ def checkout():
 
             data = {
                 "email": email,
-                "amount": int(grand_total * 100),  # Convert to cedis
+                "amount": int(grand_total * 100),
                 "metadata": {
                     "full_name": full_name,
                     "address": address,
@@ -117,6 +117,8 @@ def checkout():
                 response = requests.post(initialize_url, json=data, headers=headers, timeout=10)
                 response.raise_for_status()
                 payment_url = response.json()['data']['authorization_url']
+
+                session['paid_cart_items'] = items
                 return redirect(payment_url)
 
             except requests.exceptions.Timeout:
@@ -132,7 +134,6 @@ def checkout():
                 return render_template("errors/general_error.html", error=str(e)), 500
 
         elif payment_method == 'cod':
-            # Save order and order items
             order = Order(
                 user_id=current_user.id,
                 full_name=full_name,
@@ -143,8 +144,9 @@ def checkout():
                 status='cod'
             )
             db.session.add(order)
-            db.session.flush()  # To get order.id before commit
+            db.session.flush()
 
+            order_items_data = []
             for item in items:
                 order_item = OrderItem(
                     order_id=order.id,
@@ -153,8 +155,45 @@ def checkout():
                     price=item['product'].price
                 )
                 db.session.add(order_item)
+                order_items_data.append({
+                    'product_id': item['product'].id,
+                    'product_name': item['product'].name,
+                    'quantity': item['quantity'],
+                    'price': item['product'].price
+                })
 
             db.session.commit()
+
+            try:
+                api_data = {
+                    'order_id': order.id,
+                    'user_id': current_user.id,
+                    'full_name': full_name,
+                    'email': email,
+                    'address': address,
+                    'total_amount': grand_total,
+                    'payment_method': 'cod',
+                    'items': order_items_data
+                }
+                api_headers = {
+                    'Authorization': f'Bearer {os.getenv("API_TOKEN")}',
+                    'Content-Type': 'application/json'
+                }
+
+                api_res = requests.post(
+                    'http://127.0.0.1:5000/api/orders',
+                    json=api_data,
+                    headers=api_headers,
+                    timeout=10
+                )
+
+                if api_res.status_code == 201:
+                    flash("Order synced to admin dashboard.", "success")
+                else:
+                    flash(f"Order placed, but failed to sync to admin dashboard. {api_res.status_code}: {api_res.text}", "warning")
+
+            except Exception as e:
+                flash(f"Order placed, but error syncing to admin dashboard: {e}", "warning")
 
             flash("Order placed successfully. You will pay on delivery.", "success")
             session.pop('cart', None)
@@ -162,7 +201,6 @@ def checkout():
 
     return render_template('checkout.html', cart=items, total=grand_total)
 
-# payment callback
 @cart_bp.route('/payment/callback')
 @login_required
 def payment_callback():
@@ -185,14 +223,10 @@ def payment_callback():
         email = result['data']['customer']['email']
         address = metadata['address']
         user_id = metadata.get('user_id')
+        cart_data = metadata['cart']
 
-        # Fetch cart data from session
-        cart_items = session.get('paid_cart_items', [])
+        grand_total = sum(item['price'] * item['quantity'] for item in cart_data)
 
-        # Fix here: item is a dict, not an object
-        grand_total = sum(item['product'].price * item['quantity'] for item in cart_items)
-
-        # Save Order
         order = Order(
             user_id=user_id,
             full_name=full_name,
@@ -203,21 +237,50 @@ def payment_callback():
             status='paid'
         )
         db.session.add(order)
-        db.session.commit()
+        db.session.flush()
 
-        # Save each item
-        for item in cart_items:
+        for item in cart_data:
             order_item = OrderItem(
                 order_id=order.id,
-                product_id=item['product'].id,
+                product_id=item['product_id'],
                 quantity=item['quantity'],
-                price=item['product'].price
+                price=item['price']
             )
             db.session.add(order_item)
 
         db.session.commit()
 
-        # Clear cart
+        try:
+            api_data = {
+                'order_id': order.id,
+                'user_id': user_id,
+                'full_name': full_name,
+                'email': email,
+                'address': address,
+                'total_amount': grand_total,
+                'payment_method': 'paystack',
+                'items': cart_data
+            }
+            api_headers = {
+                'Authorization': f'Bearer {os.getenv("API_TOKEN")}',
+                'Content-Type': 'application/json'
+            }
+
+            api_res = requests.post(
+                'http://127.0.0.1:5000/api/orders',
+                json=api_data,
+                headers=api_headers,
+                timeout=10
+            )
+
+            if api_res.status_code == 201:
+                flash("Order synced to admin dashboard.", "success")
+            else:
+                flash(f"Order placed, but failed to sync to admin dashboard. {api_res.status_code}: {api_res.text}", "warning")
+
+        except Exception as e:
+            flash(f"Order placed, but error syncing to admin dashboard: {e}", "warning")
+
         session.pop('cart', None)
         session.pop('paid_cart_items', None)
 
@@ -227,7 +290,6 @@ def payment_callback():
     else:
         flash("Payment verification failed.", "danger")
         return redirect(url_for('cart.view_cart'))
-
 
 def get_cart_items_for_user(user_id=None):
     cart = session.get('cart', {})
