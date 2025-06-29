@@ -5,7 +5,7 @@
 {% block content %}
 <div class="container my-5">
   {% if not current_user.is_authenticated %}
-    <h2 class="text-center mb-4">Latest Products</h2>
+    <h2 class="text-center mb-4" style="color: #0C2E60;">Latest Products</h2>
 
     {% if products.items %}
       <div class="row">
