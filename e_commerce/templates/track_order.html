@@ -3,16 +3,60 @@
   <section class="container my-5">
     <h2 class="text-center mb-4">Track your Order</h2>
     <p class="text-center">Enter your Order ID and billing email to track your order status.</p>
+
     <form class="row g-3 justify-content-center track-form" method="POST" action="{{ url_for('main.track_order') }}">
       <div class="col-md-4">
-        <input type="text" name="order_id" class="form-control" placeholder="Found in your order confirmation email">
+        <input type="text" name="order_id" class="form-control" placeholder="Order ID" required>
       </div>
       <div class="col-md-4">
-        <input type="email" name="billing_email" class="form-control" placeholder="Email you used during checkout">
+        <input type="email" name="billing_email" class="form-control" placeholder="Billing Email" required>
       </div>
       <div class="col-12 text-center">
         <button type="submit" class="btn btn-secondary">Track</button>
       </div>
     </form>
+
+    {% if order %}
+    <div class="mt-5">
+      <h4 class="text-center">Order Details</h4>
+      <table class="table table-bordered mt-3">
+        <tr>
+          <th>Order ID</th>
+          <td>{{ order.id }}</td>
+        </tr>
+        <tr>
+          <th>Customer</th>
+          <td>{{ order.full_name }}</td>
+        </tr>
+        <tr>
+          <th>Email</th>
+          <td>{{ order.email }}</td>
+        </tr>
+        <tr>
+          <th>Address</th>
+          <td>{{ order.address }}</td>
+        </tr>
+        <tr>
+          <th>Total</th>
+          <td>GH₵{{ '%.2f' % order.total_amount }}</td>
+        </tr>
+        <tr>
+          <th>Payment Method</th>
+          <td>{{ order.payment_method }}</td>
+        </tr>
+        <tr>
+          <th>Status</th>
+          <td>{{ order.status }}</td>
+        </tr>
+      </table>
+
+      <h5>Items</h5>
+      <ul>
+        {% for item in order.items %}
+          <li>{{ item.product_name }} - GH₵{{ '%.2f' % item.price }} × {{ item.quantity }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
   </section>
 {% endblock %}

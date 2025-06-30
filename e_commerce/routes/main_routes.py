@@ -36,12 +36,18 @@ def view_product(product_id):
 
 @main_bp.route('/track-your-order', methods=['GET', 'POST'])
 def track_order():
+    order = None
     if request.method == 'POST':
         order_id = request.form['order_id']
         billing_email = request.form['billing_email']
-        # You could add logic here to fetch order data
-        return render_template("track_order.html", order_id=order_id, billing_email=billing_email)
-    return render_template("track_order.html")
+        
+        # Query the order by ID + email to verify
+        order = Order.query.filter_by(id=order_id, email=billing_email).first()
+
+        if not order:
+            flash("No order found with that ID and email.", "warning")
+
+    return render_template("track_order.html", order=order)
 
 # NewsLetter subscription
 @main_bp.route('/subscribe', methods=['POST'])
