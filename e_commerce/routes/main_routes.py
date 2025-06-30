@@ -165,10 +165,12 @@ def delete_ordered_product(product_id):
 
 
 #  order successful
-@main_bp.route('/order-success')
+@main_bp.route('/order-success/<int:order_id>')
 @login_required
-def order_success():
-    return render_template('order_success.html')
+def order_success(order_id):
+    order = Order.query.get_or_404(order_id)
+    return render_template('order_success.html', order=order)
+
 
 # autocomplete text
 @main_bp.route('/autocomplete')

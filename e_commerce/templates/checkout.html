@@ -31,11 +31,11 @@
           <ul class="list-group mb-3">
             {% set ns = namespace(grand_total=0, total_items=0) %}
             {% for item in cart %}
-              {% set total = item.product.price * item.quantity %}
+              {% set total = item['price'] * item['quantity'] %}
               {% set ns.grand_total = ns.grand_total + total %}
-              {% set ns.total_items = ns.total_items + item.quantity %}
+              {% set ns.total_items = ns.total_items + item['quantity'] %}
               <li class="list-group-item d-flex justify-content-between align-items-center">
-                {{ item.product.name }} × {{ item.quantity }}
+                {{ item['product_name'] }} × {{ item['quantity'] }}
                 <span>GH₵{{ '%.2f'|format(total) }}</span>
               </li>
             {% endfor %}

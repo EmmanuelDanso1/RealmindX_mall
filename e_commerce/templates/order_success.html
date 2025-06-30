@@ -1,14 +1,30 @@
-<!-- templates/order_success.html -->
 {% extends "index.html" %}
 {% block title %}Order Successful{% endblock %}
 
 {% block content %}
-<div class="container my-5 text-center">
-  <div class="alert alert-success">
-    <h2 class="mb-3">🎉 Thank you for your order!</h2>
-    <p>Your payment was successful and your order has been placed.</p>
+<div class="container my-5">
+  <div class="alert alert-success text-center p-4 shadow-sm rounded">
+    <h2 class="mb-3">Thank you for your order!</h2>
+    <p>Your order has been placed.</p>
+    <p>Your <strong>Order ID</strong> is <span class="text-primary">{{ order.id }}</span></p>
+    <p><strong>Payment Method:</strong> {{ order.payment_method|capitalize }}</p>
+    <p><strong>Total Amount:</strong> GH₵{{ '%.2f'|format(order.total_amount) }}</p>
+    <p><strong>Billing Name:</strong> {{ order.full_name }}</p>
+    <p><strong>Delivery Address:</strong> {{ order.address }}</p>
   </div>
 
-  <a href="{{ url_for('main.home') }}" class="btn btn-outline-dark mt-3">Continue Shopping</a>
+  <h4 class="mt-5 mb-3">Order Items</h4>
+  <ul class="list-group mb-4">
+    {% for item in order.items %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      {{ item.product.name }} (x{{ item.quantity }})
+      <span>GH₵{{ '%.2f'|format(item.price * item.quantity) }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+
+  <div class="text-center">
+    <a href="{{ url_for('main.home') }}" class="btn btn-outline-dark">Continue Shopping</a>
+  </div>
 </div>
 {% endblock %}
