@@ -30,14 +30,14 @@ def receive_product():
         if not category_name:
             return jsonify({'error': 'Category is required'}), 400
 
-        # ✅ Find or create category
+        # Find or create category
         category = Category.query.filter_by(name=category_name).first()
         if not category:
             category = Category(name=category_name)
             db.session.add(category)
             db.session.commit()
 
-        # ✅ Create product with new metadata fields
+        #  Create product with new metadata fields
         product = Product(
             name=data['name'],
             description=data['description'],
@@ -129,14 +129,14 @@ def update_product_api(product_id):
         product.in_stock = data.get('in_stock', True)
         product.image_filename = data.get('image_filename', product.image_filename)
 
-        # ✅ Optional fields
+        # Optional fields
         product.author = data.get('author')
         product.brand = data.get('brand')
         product.grade = data.get('grade')
         product.level = data.get('level')
         product.subject = data.get('subject')
 
-        # ✅ Handle category update (optional)
+        # Handle category update (optional)
         category_name = data.get('category', '').strip().title()
         if category_name:
             category = Category.query.filter_by(name=category_name).first()

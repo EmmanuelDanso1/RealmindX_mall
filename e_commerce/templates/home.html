@@ -3,54 +3,59 @@
 {% block title %}Welcome | RealmindXEduMall{% endblock %}
 
 {% block content %}
-<div class="container my-5">
+<div class="container my-4">
+
   {% if not current_user.is_authenticated %}
-    <h2 class="text-center mb-4" style="color: #0C2E60;">Latest Products</h2>
+    <h2 class="text-center mb-3" style="color: #0C2E60;">Latest Products</h2>
 
     {% if products.items %}
-      <div class="row">
+      <div class="row g-2">
         {% for product in products.items %}
-        <div class="col-md-4 mb-4">
+        <div class="col-6 col-md-4">
           <div class="card h-100 shadow-sm border-0">
-            <div class="position-relative" style="height: 250px;">
+            
+            <div class="position-relative" style="height: 180px;">
               <img 
                 src="{{ url_for('static', filename='uploads/' ~ product.image_filename) }}" 
                 class="card-img-top" 
                 alt="{{ product.name }}" 
-                style="height: 100%; object-fit: cover;">
+                style="height: 100%; object-fit: cover; border-top-left-radius: .5rem; border-top-right-radius: .5rem;">
+              
               {% if not product.in_stock %}
               <div class="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
                    style="background-color: rgba(0, 0, 0, 0.4); z-index: 10;">
-                <span class="text-white fw-bold" style="font-size: 2rem;">Out of Stock</span>
+                <span class="text-white fw-bold" style="font-size: 1.2rem;">Out of Stock</span>
               </div>
               {% endif %}
             </div>
 
-            <div class="card-body">
-              <h5 class="card-title" style="color: #0C2E60;">{{ product.name }}</h5>
-              <p class="card-text" style="color: #0C2E60;">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
+            <div class="card-body p-2">
+              <h6 class="card-title mb-1" style="color: #0C2E60;">{{ product.name }}</h6>
+              <p class="card-text small mb-1" style="color: #0C2E60;">
+                {{ product.description[:60] }}{% if product.description|length > 60 %}...{% endif %}
+              </p>
 
               {% if product.author %}
-                <p class="mb-1"><strong style="color: #0C2E60;">Author:</strong> {{ product.author }}</p>
+              <p class="mb-1 small"><strong style="color: #0C2E60;">Author:</strong> {{ product.author }}</p>
               {% endif %}
               {% if product.subject %}
-                <p class="mb-1"><strong style="color: #0C2E60;">Subject:</strong> {{ product.subject }}</p>
+              <p class="mb-1 small"><strong style="color: #0C2E60;">Subject:</strong> {{ product.subject }}</p>
               {% endif %}
               {% if product.grade %}
-                <p class="mb-1"><strong style="color: #0C2E60;">Grade:</strong> {{ product.grade }}</p>
+              <p class="mb-1 small"><strong style="color: #0C2E60;">Grade:</strong> {{ product.grade }}</p>
               {% endif %}
               {% if product.level %}
-                <p class="mb-1"><strong style="color: #0C2E60;">Level:</strong> {{ product.level }}</p>
+              <p class="mb-1 small"><strong style="color: #0C2E60;">Level:</strong> {{ product.level }}</p>
               {% endif %}
               {% if product.brand %}
-                <p class="mb-1"><strong style="color: #0C2E60;">Brand:</strong> {{ product.brand }}</p>
+              <p class="mb-1 small"><strong style="color: #0C2E60;">Brand:</strong> {{ product.brand }}</p>
               {% endif %}
 
-              <p class="text-primary fw-bold">GH₵{{ '%.2f'|format(product.price) }}</p>
+              <p class="text-primary fw-bold small mb-1">GH₵{{ '%.2f'|format(product.price) }}</p>
 
               {% if product.ratings %}
                 {% set avg_rating = (product.ratings | map(attribute='rating') | list | sum) / product.ratings|length %}
-                <div class="mb-2">
+                <div class="mb-1">
                   {% for i in range(1, 6) %}
                     {% if i <= avg_rating %}
                       <span class="text-warning">&#9733;</span>
@@ -58,33 +63,31 @@
                       <span class="text-secondary">&#9733;</span>
                     {% endif %}
                   {% endfor %}
-                  <small class="text-muted">({{ '%.1f' % avg_rating }} / 5)</small>
+                  <small class="text-muted">({{ '%.1f' % avg_rating }}/5)</small>
                 </div>
               {% else %}
-                <small class="text-muted d-block mb-2">No rating</small>
+                <small class="text-muted d-block mb-1">No rating</small>
               {% endif %}
 
+              <span class="badge {{ 'bg-success' if product.in_stock else 'bg-danger' }} mb-2">
+                {{ 'In Stock' if product.in_stock else 'Out of Stock' }}
+              </span>
+
               {% if product.in_stock %}
-                <span class="badge bg-success mb-2">In Stock</span>
+                <a href="{{ url_for('cart.add_quantity', product_id=product.id) }}" class="btn btn-outline-dark btn-sm w-100">Add to cart</a>
               {% else %}
-                <span class="badge bg-danger mb-2">Out of Stock</span>
+                <button class="btn btn-outline-dark btn-sm w-100" disabled>Add to cart</button>
               {% endif %}
 
-              <br>
-              {% if product.in_stock %}
-                <a href="{{ url_for('cart.add_quantity', product_id=product.id) }}" class="btn btn-outline-dark btn-sm mt-2">Add to cart</a>
-              {% else %}
-                <button class="btn btn-outline-dark btn-sm mt-2" disabled>Add to cart</button>
-              {% endif %}
             </div>
           </div>
         </div>
         {% endfor %}
       </div>
 
-      <!-- Pagination shown ONLY if products exist -->
+      <!-- Pagination -->
       <nav aria-label="Page navigation">
-        <ul class="pagination justify-content-center mt-4">
+        <ul class="pagination justify-content-center mt-3">
           {% if products.has_prev %}
             <li class="page-item">
               <a class="page-link" href="{{ url_for('main.home', page=products.prev_num) }}">Previous</a>
@@ -119,10 +122,13 @@
     {% else %}
       <div class="alert alert-warning text-center">No products available at the moment.</div>
     {% endif %}
+
   {% else %}
     <div class="alert alert-info text-center">
-      Welcome, {{ current_user.username }}. You can view and rate your <a href="{{ url_for('main.purchased_products') }}">purchased products here</a>.
+      Welcome, {{ current_user.username }}. You can view and rate your 
+      <a href="{{ url_for('main.purchased_products') }}">purchased products here</a>.
     </div>
   {% endif %}
+
 </div>
 {% endblock %}
