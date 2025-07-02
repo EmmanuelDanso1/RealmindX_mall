@@ -20,7 +20,9 @@
         <tbody>
           {% set ns = namespace(grand_total=0, total_items=0) %}
           {% for item in cart %}
-            {% set total = item.product.price * item.quantity %}
+            {% set is_discounted = item.product.discount_percentage and item.product.discount_percentage > 0 %}
+            {% set unit_price = item.product.discounted_price if is_discounted else item.product.price %}
+            {% set total = unit_price * item.quantity %}
             {% set ns.grand_total = ns.grand_total + total %}
             {% set ns.total_items = ns.total_items + item.quantity %}
             <tr>
@@ -31,7 +33,9 @@
                   <span>{{ item.product.name }}</span>
                 </div>
               </td>
-              <td>GH₵{{ '%.2f'|format(item.product.price) }}</td>
+              <td>
+                GH₵{{ '%.2f'|format(unit_price) }}
+              </td>
               <td>{{ item.quantity }}</td>
               <td>GH₵{{ '%.2f'|format(total) }}</td>
               <td>
@@ -85,7 +89,6 @@
       </div>
     </div>
 
-    <!-- Modal Logic Script -->
     <script>
       document.addEventListener('DOMContentLoaded', function () {
         const confirmModal = document.getElementById('confirmRemoveModal');

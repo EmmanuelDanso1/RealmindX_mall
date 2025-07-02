@@ -1,5 +1,4 @@
 {% extends "index.html" %}
-
 {% block title %}Welcome | RealmindXEduMall{% endblock %}
 
 {% block content %}
@@ -14,6 +13,7 @@
         <div class="col-6 col-md-4">
           <div class="card h-100 shadow-sm border-0">
             
+            <!-- Image -->
             <div class="position-relative" style="height: 180px;">
               <img 
                 src="{{ url_for('static', filename='uploads/' ~ product.image_filename) }}" 
@@ -29,17 +29,31 @@
               {% endif %}
             </div>
 
+            <!-- Body -->
             <div class="card-body p-2">
               <h6 class="card-title mb-1" style="color: #0C2E60;">{{ product.name }}</h6>
               <p class="card-text small mb-1" style="color: #0C2E60;">
                 {{ product.description[:60] }}{% if product.description|length > 60 %}...{% endif %}
               </p>
 
-            
-              
+              <!-- Price Display -->
+              {% if product.discount_percentage and product.discount_percentage > 0 %}
+                <p class="mb-1">
+                  <del class="text-muted">GH₵{{ '%.2f'|format(product.price) }}</del>
+                  <span class="text-danger fw-bold ms-2">
+                    GH₵{{ '%.2f'|format(product.discounted_price) }}
+                  </span>
+                  <span class="badge bg-success ms-1 small">
+                    {{ '%.0f'|format(product.discount_percentage) }}% OFF
+                  </span>
+                </p>
+              {% else %}
+                <p class="text-primary fw-bold small mb-1">
+                  GH₵{{ '%.2f'|format(product.price) }}
+                </p>
+              {% endif %}
 
-              <p class="text-primary fw-bold small mb-1">GH₵{{ '%.2f'|format(product.price) }}</p>
-
+              <!-- Ratings -->
               {% if product.ratings %}
                 {% set avg_rating = (product.ratings | map(attribute='rating') | list | sum) / product.ratings|length %}
                 <div class="mb-1">
@@ -56,16 +70,17 @@
                 <small class="text-muted d-block mb-1 fst-italic">Be the first to rate</small>
               {% endif %}
 
+              <!-- Stock Status -->
               <span class="badge {{ 'bg-success' if product.in_stock else 'bg-danger' }} mb-2">
                 {{ 'In Stock' if product.in_stock else 'Out of Stock' }}
               </span>
 
+              <!-- Add to Cart Button -->
               {% if product.in_stock %}
                 <a href="{{ url_for('cart.add_quantity', product_id=product.id) }}" class="btn btn-outline-dark btn-sm w-100">Add to cart</a>
               {% else %}
                 <button class="btn btn-outline-dark btn-sm w-100" disabled>Add to cart</button>
               {% endif %}
-
             </div>
           </div>
         </div>
@@ -80,9 +95,7 @@
               <a class="page-link" href="{{ url_for('main.home', page=products.prev_num) }}">Previous</a>
             </li>
           {% else %}
-            <li class="page-item disabled">
-              <span class="page-link">Previous</span>
-            </li>
+            <li class="page-item disabled"><span class="page-link">Previous</span></li>
           {% endif %}
 
           {% for p in products.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
@@ -100,9 +113,7 @@
               <a class="page-link" href="{{ url_for('main.home', page=products.next_num) }}">Next</a>
             </li>
           {% else %}
-            <li class="page-item disabled">
-              <span class="page-link">Next</span>
-            </li>
+            <li class="page-item disabled"><span class="page-link">Next</span></li>
           {% endif %}
         </ul>
       </nav>

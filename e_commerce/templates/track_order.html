@@ -36,6 +36,16 @@
           <th>Address</th>
           <td>{{ order.address }}</td>
         </tr>
+        {% for item in order.items %}
+        <tr>
+          <th>Book Name</th>
+          <td>{{ item.product.name }}</td>
+        </tr>
+        <tr>
+          <th>Quantity</th>
+          <td>{{ item.quantity }}</td>
+        </tr>
+        {% endfor %}
         <tr>
           <th>Total</th>
           <td>GH₵{{ '%.2f' % order.total_amount }}</td>

@@ -82,7 +82,14 @@
             <a href="{{ url_for('main.contact') }}" class="btn btn-outline-dark me-3"><i></i>Contact</a>
             <a href="{{ url_for('main.track_order') }}" class="btn btn-outline-dark me-3"><i></i>Track your order</a>
             <a href="{{ url_for('main.info') }}" class="btn btn-outline-dark me-3"><i class="fas fa-info-circle me-1"></i> Info</a>
-            <a href="{{ url_for('cart.view_cart') }}" class="nav-link me-3"><i class="fas fa-shopping-cart me-1"></i></a>
+            <a href="{{ url_for('cart.view_cart') }}" class="text-dark position-relative me-3">
+              <i class="fas fa-shopping-cart"></i>
+              {% if cart_item_count %}
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                {{ cart_item_count }}
+              </span>
+              {% endif %}
+            </a>
             <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-sm me-2">Login</a>
             <a href="{{ url_for('auth.user_signup') }}" class="btn btn-primary btn-sm">Signup</a>
           {% else %}

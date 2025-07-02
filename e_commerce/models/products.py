@@ -8,6 +8,7 @@ class Product(db.Model):
     name = db.Column(db.String(120), nullable=False)
     description = db.Column(db.Text, nullable=False)
     price = db.Column(db.Float, nullable=False)
+    discount_percentage = db.Column(db.Float, default=0.0)
     image_filename = db.Column(db.String(120))
     in_stock = db.Column(db.Boolean, default=True)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
@@ -35,3 +36,9 @@ class Product(db.Model):
         if not self.ratings:
             return 0
         return round(sum(r.rating for r in self.ratings) / len(self.ratings), 1)
+    
+    # discount
+    @property
+    def discounted_price(self):
+        return round(self.price * (1 - self.discount_percentage / 100), 2) if self.discount_percentage else self.price
+

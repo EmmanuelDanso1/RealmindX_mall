@@ -39,6 +39,7 @@ def receive_product():
             name=data['name'],
             description=data['description'],
             price=data['price'],
+            discount_percentage=data.get('discount_percentage', 0.0),
             image_filename=data.get('image_filename'),
             in_stock=data.get('in_stock', True),
             category_id=category.id,
@@ -73,6 +74,7 @@ def get_products():
             'name': product.name,
             'description': product.description,
             'price': product.price,
+            'discount_percentage': product.discount_percentage,
             'image_filename': product.image_filename,
             'in_stock': product.in_stock,
             'author': product.author,
@@ -123,6 +125,7 @@ def update_product_api(product_id):
         product.name = data['name']
         product.description = data['description']
         product.price = data['price']
+        product.discount_percentage = data.get('discount_percentage', 0.0)
         product.in_stock = data.get('in_stock', True)
         product.image_filename = data.get('image_filename', product.image_filename)
 

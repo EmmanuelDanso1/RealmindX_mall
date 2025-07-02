@@ -29,7 +29,16 @@
       <div class="col-md-7">
         <div class="card-body">
           <h4 class="card-title">{{ product.name }}</h4>
-          <p class="card-text text-primary fw-bold">Price per item: GH₵{{ '%.2f'|format(product.price) }}</p>
+
+          {% if product.discount_percentage and product.discount_percentage > 0 %}
+            <p class="card-text fw-bold mb-2">
+              <span class="text-muted"><del>GH₵{{ '%.2f'|format(product.price) }}</del></span>
+              <span class="text-danger ms-2">GH₵{{ '%.2f'|format(product.discounted_price) }}</span>
+              <span class="badge bg-success ms-1">{{ '%.0f'|format(product.discount_percentage) }}% OFF</span>
+            </p>
+          {% else %}
+            <p class="card-text text-primary fw-bold">Price per item: GH₵{{ '%.2f'|format(product.price) }}</p>
+          {% endif %}
 
           {% if product.in_stock %}
             <span class="badge bg-success mb-2">In Stock</span>
@@ -42,7 +51,7 @@
               <label for="quantity" class="form-label">Quantity</label>
               <input type="number" name="quantity" id="quantity" class="form-control" min="1" value="1" required>
             </div>
-            <button type="submit" class="btn btn-primary">Add to Cart</button>
+            <button type="submit" class="btn btn-primary" {% if not product.in_stock %}disabled{% endif %}>Add to Cart</button>
           </form>
         </div>
       </div>

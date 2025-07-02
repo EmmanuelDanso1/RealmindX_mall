@@ -20,21 +20,26 @@ def get_cart():
 @cart_bp.route('/cart/add/<int:product_id>', methods=['POST'])
 def add_to_cart(product_id):
     product = Product.query.get_or_404(product_id)
-    cart = get_cart()
+    cart = session.get('cart', {})
 
-    if str(product_id) in cart:
-        cart[str(product_id)]['quantity'] += 1
+    product_id_str = str(product.id)
+
+    if product_id_str in cart:
+        cart[product_id_str]['quantity'] += 1
     else:
-        cart[str(product_id)] = {
+        cart[product_id_str] = {
             'name': product.name,
-            'price': product.price,
+            'price': float(product.discounted_price if product.discount_percentage > 0 else product.price),
             'image': product.image_filename,
             'quantity': 1
         }
 
+    session['cart'] = cart  # <- This ensures session gets updated
     session.modified = True
+
     flash(f"Added {product.name} to cart.", "success")
     return redirect(request.referrer or url_for('main.home'))
+
 
 # View Cart
 @cart_bp.route('/cart')
@@ -77,12 +82,15 @@ def checkout():
         product = Product.query.get(int(product_id))
         if product:
             quantity = item['quantity']
-            total = product.price * quantity
+            price_to_use = product.discounted_price if product.discount_percentage > 0 else product.price
+            total = price_to_use * quantity
             grand_total += total
+
             items.append({
                 'product_id': product.id,
+                'original_price': product.price,
                 'product_name': product.name,
-                'price': product.price,
+                'price': price_to_use,
                 'quantity': quantity,
                 'total': total
             })
@@ -106,14 +114,7 @@ def checkout():
                     "full_name": full_name,
                     "address": address,
                     "user_id": current_user.id,
-                    "cart": [
-                        {
-                            "product_id": p['product_id'],
-                            "product_name": p['product_name'],
-                            "quantity": p['quantity'],
-                            "price": p['price']
-                        } for p in items
-                    ]
+                    "cart": items
                 },
                 "callback_url": url_for('cart.payment_callback', _external=True)
             }
@@ -127,7 +128,7 @@ def checkout():
                 )
                 response.raise_for_status()
                 payment_url = response.json()['data']['authorization_url']
-                session['paid_cart_items'] = data['metadata']['cart']
+                session['paid_cart_items'] = items
                 return redirect(payment_url)
 
             except requests.exceptions.Timeout:
@@ -141,15 +142,14 @@ def checkout():
                 return render_template("errors/general_error.html", error=str(e)), 500
 
         elif payment_method == 'cod':
-            # Save order + order items
             order = Order(
                 user_id=current_user.id,
                 full_name=full_name,
                 email=email,
                 address=address,
                 total_amount=grand_total,
-                payment_method='cod',
-                status='cod'
+                payment_method='cash on delivery',
+                status='pending'
             )
             db.session.add(order)
             db.session.flush()
@@ -166,21 +166,12 @@ def checkout():
                 order_items_data.append({
                     'product_id': item['product_id'],
                     'product_name': item['product_name'],
-                    'quantity':int(item['quantity']),
+                    'quantity': int(item['quantity']),
                     'price': float(item['price'])
                 })
 
             db.session.commit()
 
-            # Send email
-            # msg = Message(
-            #     subject="Your Order Confirmation",
-            #     recipients=[email],
-            #     body=f"Thank you for your order! Your Order ID is {order.id}. Please keep it for tracking."
-            # )
-            # mail.send(msg)
-
-            # Sync to admin dashboard
             try:
                 api_data = {
                     'order_id': order.id,
@@ -215,6 +206,7 @@ def checkout():
 
     return render_template('checkout.html', cart=items, total=grand_total)
 
+
 @cart_bp.route('/payment/callback')
 @login_required
 def payment_callback():
@@ -237,6 +229,7 @@ def payment_callback():
     if result['status'] and result['data']['status'] == 'success':
         data = result['data']
         metadata = data['metadata']
+        cart_items = metadata.get('cart', [])
 
         order = Order(
             user_id=metadata.get('user_id'),
@@ -250,23 +243,17 @@ def payment_callback():
         db.session.add(order)
         db.session.flush()
 
-        # Save order items
-        for item in metadata['cart']:
+        for item in cart_items:
             db.session.add(OrderItem(
                 order_id=order.id,
                 product_id=item['product_id'],
                 quantity=int(item['quantity']),
-                price=float(item['price'])
+                price=float(item['price'])  # discounted price used
             ))
 
         db.session.commit()
 
-        # OPTIONAL: send email
-        # msg = Message("Your Order Confirmation", recipients=[order.email],
-        #               body=f"Thank you! Your Order ID is {order.id}.")
-        # mail.send(msg)
-
-        # OPTIONAL: sync to admin
+        # Sync to admin dashboard
         try:
             api_data = {
                 'order_id': order.id,
@@ -276,7 +263,7 @@ def payment_callback():
                 'address': order.address,
                 'total_amount': order.total_amount,
                 'payment_method': order.payment_method,
-                'items': metadata['cart']
+                'items': cart_items
             }
             api_headers = {
                 'Authorization': f'Bearer {os.getenv("API_TOKEN")}',
@@ -305,7 +292,6 @@ def payment_callback():
         return redirect(url_for('cart.view_cart'))
 
 
-
 def get_cart_items_for_user(user_id=None):
     cart = session.get('cart', {})
     items = []
@@ -330,25 +316,23 @@ def add_quantity(product_id):
     if request.method == 'POST':
         quantity = int(request.form.get('quantity', 1))
 
-        cart = session.get('cart', {})  # dictionary: product_id -> item data
+        cart = session.get('cart', {})
         product_id_str = str(product.id)
 
-        # Check if product already in cart
         if product_id_str in cart:
             cart[product_id_str]['quantity'] += quantity
-            cart[product_id_str]['total'] = round(cart[product_id_str]['quantity'] * cart[product_id_str]['price'], 2)
         else:
             cart[product_id_str] = {
                 'product_id': product.id,
                 'name': product.name,
-                'price': float(product.price),
-                'quantity': quantity,
-                'total': round(float(product.price) * quantity, 2)
+                'price': float(product.discounted_price if product.discount_percentage > 0 else product.price),
+                'quantity': quantity
             }
 
         session['cart'] = cart
+        session.modified = True
+
         flash('Item added to cart successfully.', 'success')
         return redirect(url_for('cart.view_cart'))
 
     return render_template('cart/add_quantity.html', product=product)
-
