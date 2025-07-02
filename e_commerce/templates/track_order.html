@@ -46,7 +46,17 @@
         </tr>
         <tr>
           <th>Status</th>
-          <td>{{ order.status }}</td>
+          <td>
+            {% if order.status == 'Delivered' %}
+              <span class="badge bg-success">{{ order.status }}</span>
+            {% elif order.status == 'In Process' %}
+              <span class="badge bg-warning text-dark">{{ order.status }}</span>
+            {% elif order.status == 'Received' %}
+              <span class="badge bg-info text-dark">{{ order.status }}</span>
+            {% else %}
+              <span class="badge bg-secondary">{{ order.status }}</span>
+            {% endif %}
+          </td>
         </tr>
       </table>
 

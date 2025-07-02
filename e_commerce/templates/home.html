@@ -35,21 +35,8 @@
                 {{ product.description[:60] }}{% if product.description|length > 60 %}...{% endif %}
               </p>
 
-              {% if product.author %}
-              <p class="mb-1 small"><strong style="color: #0C2E60;">Author:</strong> {{ product.author }}</p>
-              {% endif %}
-              {% if product.subject %}
-              <p class="mb-1 small"><strong style="color: #0C2E60;">Subject:</strong> {{ product.subject }}</p>
-              {% endif %}
-              {% if product.grade %}
-              <p class="mb-1 small"><strong style="color: #0C2E60;">Grade:</strong> {{ product.grade }}</p>
-              {% endif %}
-              {% if product.level %}
-              <p class="mb-1 small"><strong style="color: #0C2E60;">Level:</strong> {{ product.level }}</p>
-              {% endif %}
-              {% if product.brand %}
-              <p class="mb-1 small"><strong style="color: #0C2E60;">Brand:</strong> {{ product.brand }}</p>
-              {% endif %}
+            
+              
 
               <p class="text-primary fw-bold small mb-1">GH₵{{ '%.2f'|format(product.price) }}</p>
 
@@ -66,7 +53,7 @@
                   <small class="text-muted">({{ '%.1f' % avg_rating }}/5)</small>
                 </div>
               {% else %}
-                <small class="text-muted d-block mb-1">No rating</small>
+                <small class="text-muted d-block mb-1 fst-italic">Be the first to rate</small>
               {% endif %}
 
               <span class="badge {{ 'bg-success' if product.in_stock else 'bg-danger' }} mb-2">

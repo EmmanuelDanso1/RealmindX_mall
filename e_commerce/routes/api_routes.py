@@ -1,6 +1,6 @@
 from flask import request, jsonify, Blueprint, current_app
 from werkzeug.utils import secure_filename
-from e_commerce.models import Product, Category, InfoDocument
+from e_commerce.models import Product, Category, InfoDocument, Order
 from e_commerce import db
 import os
 from e_commerce.utils.helpers import allowed_file, allowed_image_file
@@ -10,9 +10,6 @@ import traceback
 API_TOKEN = os.getenv("API_TOKEN")
 
 api_bp = Blueprint('api', __name__)
-
-# serve uploaded file
-
 
 @api_bp.route('/uploads/<filename>')
 def uploaded_file(filename):
@@ -307,3 +304,24 @@ def delete_info_document(id):
     except Exception as e:
         print("API Delete Error:", e)
         return jsonify({'error': str(e)}), 400
+
+# update for status check
+@api_bp.route('/api/orders/<int:order_id>/status', methods=['POST'])
+def update_order_status_api(order_id):
+    
+    order = Order.query.filter_by(id=order_id).first()
+    if not order:
+        return jsonify({'error': 'Order not found'}), 404
+
+    data = request.get_json()
+    if not data or 'status' not in data:
+        return jsonify({'error': 'Missing status'}), 400
+
+    new_status = data['status']
+    if new_status not in ['Received', 'In Process', 'Delivered']:
+        return jsonify({'error': 'Invalid status'}), 400
+
+    order.status = new_status
+    db.session.commit()
+
+    return jsonify({'success': True, 'status': new_status})
