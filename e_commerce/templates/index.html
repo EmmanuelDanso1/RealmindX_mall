@@ -160,12 +160,14 @@
     </div>
     <div>
       <h6>Find It Fast</h6>
-      <ul class="list-unstyled">
-        <li><a href="#">School Textbooks</a></li>
-        <li><a href="#">Cambridge Textbooks</a></li>
-        <li><a href="#">Lifestyle Books</a></li>
-        <li><a href="#">Stationery</a></li>
+      <ul class="list-group list-group-flush">
+        {% for cat in categories %}
+          <li class="list-group-item px-0">
+            <a href="{{ url_for('main.search', category=cat.id) }}" class="text-decoration-none">{{ cat.name }}</a>
+          </li>
+        {% endfor %}
       </ul>
+
     </div>
     <div>
       <h6>Delivery</h6>
@@ -177,9 +179,9 @@
     <div>
       <h6>Customer Care</h6>
       <ul class="list-unstyled">
-        <li><a href="{{ url_for('auth.login') }}">My Account</a></li>
-        <li><a href="{{ url_for('auth.login') }}">My Orders</a></li>
-        <li><a href="{{ url_for('auth.login') }}">Checkout</a></li>
+        <li><a href="{{ url_for('auth.login') }}" class="text-decoration-none" >My Account</a></li>
+        <li><a href="{{ url_for('auth.login') }}" class="text-decoration-none">My Orders</a></li>
+        <li><a href="{{ url_for('cart.checkout') }}" class="text-decoration-none">Checkout</a></li>
         <li><a href="#">Terms & Conditions</a></li>
       </ul>
     </div>

@@ -1,8 +1,9 @@
 from flask import request, jsonify, Blueprint, current_app
 from werkzeug.utils import secure_filename
-from e_commerce.models import Product, Category, InfoDocument, Order
+from e_commerce.models import Product, Category, InfoDocument, Order, PromotionFlier, NewsletterSubscriber
 from e_commerce import db
 import os
+import json
 from e_commerce.utils.helpers import allowed_file, allowed_image_file
 from flask import send_from_directory
 import traceback
@@ -21,26 +22,42 @@ def receive_product():
     if not token or token != f"Bearer {API_TOKEN}":
         return jsonify({'error': 'Unauthorized'}), 401
 
-    data = request.json
     try:
+        # Get product data from form
+        data_json = request.form.get('data')
+        if not data_json:
+            return jsonify({'error': 'Missing product data'}), 400
+
+        data = json.loads(data_json)
+
+        # Validate and handle category
         category_name = data.get('category', '').strip().title()
         if not category_name:
             return jsonify({'error': 'Category is required'}), 400
 
-        # Find or create category
         category = Category.query.filter_by(name=category_name).first()
         if not category:
             category = Category(name=category_name)
             db.session.add(category)
             db.session.commit()
 
-        #  Create product with new metadata fields
+        # Handle image file
+        file = request.files.get('image')
+        if not file:
+            return jsonify({'error': 'Image file is required'}), 400
+
+        filename = secure_filename(file.filename)
+        upload_path = os.path.join(current_app.root_path, 'static', 'uploads', filename)
+        os.makedirs(os.path.dirname(upload_path), exist_ok=True)
+        file.save(upload_path)
+
+        # Create product
         product = Product(
             name=data['name'],
             description=data['description'],
             price=data['price'],
             discount_percentage=data.get('discount_percentage', 0.0),
-            image_filename=data.get('image_filename'),
+            image_filename=filename,  # ✅ use saved filename
             in_stock=data.get('in_stock', True),
             category_id=category.id,
             author=data.get('author'),
@@ -145,6 +162,13 @@ def update_product_api(product_id):
                 db.session.add(category)
                 db.session.commit()
             product.category_id = category.id
+        file = request.files.get('image')
+        if file:
+            filename = secure_filename(file.filename)
+            upload_path = os.path.join(current_app.root_path, 'static', 'uploads', filename)
+            os.makedirs(os.path.dirname(upload_path), exist_ok=True)
+            file.save(upload_path)
+            product.image_filename = filename
 
         db.session.commit()
         return jsonify({'message': 'Product updated'}), 200
@@ -328,3 +352,112 @@ def update_order_status_api(order_id):
     db.session.commit()
 
     return jsonify({'success': True, 'status': new_status})
+
+# recieves post api
+@api_bp.route('/api/fliers', methods=['POST'])
+def receive_flier():
+    # Check Authorization header 
+    token = request.headers.get('Authorization')
+    if not token or token != f"Bearer {os.getenv('API_TOKEN')}":
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    try:
+        # Extract title (optional) and image (required)
+        title = request.form.get('title', '').strip()
+        image_file = request.files.get('image')  # ✅ FIXED: match the input field name
+
+        if not image_file:
+            return jsonify({'error': 'Image file is required'}), 400
+
+        if not allowed_image_file(image_file.filename):
+            return jsonify({'error': 'Invalid image format. Allowed: jpg, jpeg, png, gif, webp'}), 400
+
+        # Ensure upload directory exists
+        flier_dir = os.path.join(current_app.root_path, 'static', 'uploads', 'fliers')
+        os.makedirs(flier_dir, exist_ok=True)
+
+        # Save the image
+        image_filename = secure_filename(image_file.filename)
+        image_path = os.path.join(flier_dir, image_filename)
+        image_file.save(image_path)
+
+        # Save to DB
+        flier = PromotionFlier(title=title, image_filename=image_filename)
+        db.session.add(flier)
+        db.session.commit()
+
+        return jsonify({'message': 'Flier received', 'id': flier.id}), 201
+
+    except Exception as e:
+        print("Flier API Error:", e)
+        return jsonify({'error': str(e)}), 400
+
+@api_bp.route('/api/fliers/<int:flier_id>', methods=['PUT'])
+def update_flier(flier_id):
+    token = request.headers.get('Authorization')
+    if not token or token != f"Bearer {os.getenv('API_TOKEN')}":
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    flier = PromotionFlier.query.get_or_404(flier_id)
+    try:
+        title = request.form.get('title', '').strip()
+        image_file = request.files.get('image')
+
+        if title:
+            flier.title = title
+
+        if image_file:
+            if not allowed_image_file(image_file.filename):
+                return jsonify({'error': 'Invalid image format'}), 400
+
+            # Delete old image
+            old_path = os.path.join(current_app.root_path, 'static', 'uploads', 'fliers', flier.image_filename)
+            if os.path.exists(old_path):
+                os.remove(old_path)
+
+            # Save new image
+            image_filename = secure_filename(image_file.filename)
+            new_path = os.path.join(current_app.root_path, 'static', 'uploads', 'fliers', image_filename)
+            os.makedirs(os.path.dirname(new_path), exist_ok=True)
+            image_file.save(new_path)
+            flier.image_filename = image_filename
+
+        db.session.commit()
+        return jsonify({'message': 'Flier updated'}), 200
+
+    except Exception as e:
+        print("Update Flier Error:", e)
+        return jsonify({'error': str(e)}), 400
+
+@api_bp.route('/api/fliers/<int:flier_id>', methods=['DELETE'])
+def delete_flier(flier_id):
+    token = request.headers.get('Authorization')
+    if not token or token != f"Bearer {os.getenv('API_TOKEN')}":
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    flier = PromotionFlier.query.get_or_404(flier_id)
+
+    try:
+        # Delete the image file from disk
+        image_path = os.path.join(current_app.root_path, 'static', 'uploads', 'fliers', flier.image_filename)
+        if os.path.exists(image_path):
+            os.remove(image_path)
+
+        db.session.delete(flier)
+        db.session.commit()
+        return jsonify({'message': 'Flier deleted'}), 200
+
+    except Exception as e:
+        print("Delete Flier Error:", e)
+ 
+        return jsonify({'error': str(e)}), 400
+    
+@api_bp.route('/api/newsletter-subscribers')
+def get_newsletter_subscribers():
+    token = request.headers.get('Authorization')
+    if not token or token != f"Bearer {API_TOKEN}":
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    subscribers = NewsletterSubscriber.query.filter_by(is_verified=True).all()
+    emails = [s.email for s in subscribers]
+    return jsonify({'subscribers': emails}), 200

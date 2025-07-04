@@ -9,7 +9,16 @@
     <div class="col-md-6">
       <h2>{{ product.name }}</h2>
       <p class="text-muted">{{ product.description }}</p>
-      <h4 class="text-primary">GH₵{{ '%.2f' % product.price }}</h4>
+
+      <!-- Price Display -->
+      {% if product.discount_percentage and product.discount_percentage > 0 %}
+        <h4 class="text-primary">GH₵{{ '%.2f' % product.discounted_price }}</h4>
+        <p class="text-muted"><del>GH₵{{ '%.2f' % product.price }}</del></p>
+        <span class="badge bg-danger">{{ product.discount_percentage }}% OFF</span>
+      {% else %}
+        <h4 class="text-primary">GH₵{{ '%.2f' % product.price }}</h4>
+      {% endif %}
+
       {% if product.in_stock %}
         <span class="badge bg-success">In Stock</span>
       {% else %}
@@ -57,6 +66,7 @@
     </div>
   </div><br>
 </div>
+
 <style>
 .rating label {
   font-size: 1.4rem;

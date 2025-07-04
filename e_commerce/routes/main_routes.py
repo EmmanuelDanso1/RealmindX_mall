@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from flask_mail import Mail,Message
 import os
 from e_commerce import db, mail
-from e_commerce.models import Product, ProductRating, NewsletterSubscriber, Category, Order, OrderItem, InfoDocument
+from e_commerce.models import Product, ProductRating, NewsletterSubscriber, Category,PromotionFlier, Order, OrderItem, InfoDocument
 from e_commerce.utils.token import generate_verification_token, confirm_verification_token
 
 main_bp = Blueprint('main', __name__)
@@ -11,15 +11,16 @@ main_bp = Blueprint('main', __name__)
 @main_bp.route('/')
 def home():
     page = request.args.get('page', 1, type=int)
-    per_page = 12  # or any number you prefer
-
+    per_page = 9 
+    # post fliers
+    fliers = PromotionFlier.query.order_by(PromotionFlier.id.desc()).all()
     products = Product.query.order_by(Product.date_created.desc()).paginate(
         page=page,
         per_page=per_page,
         error_out=False
     )
 
-    return render_template('home.html', products=products)
+    return render_template('home.html', products=products, fliers=fliers)
 
 
 @main_bp.route('/contact')
