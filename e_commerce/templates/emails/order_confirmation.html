@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Your Order with EduConnect</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      color: #333;
+      padding: 20px;
+      background-color: #f8f9fa;
+    }
+    .container {
+      background-color: #fff;
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      max-width: 600px;
+      margin: auto;
+    }
+    h2 {
+      color: #0056b3;
+    }
+    .order-details {
+      margin-top: 20px;
+    }
+    .order-details ul {
+      list-style: none;
+      padding: 0;
+    }
+    .order-details li {
+      padding: 8px 0;
+      border-bottom: 1px solid #ddd;
+    }
+    .footer {
+      margin-top: 30px;
+      font-size: 14px;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Hello {{ full_name }},</h2>
+
+    <p>Thank you for shopping with <strong>RealmindXEduMall</strong>! 🎉</p>
+    
+    <p>We’ve received your order and are getting it ready for processing. You’ll receive another email when your items are on the way.</p>
+
+    <div class="order-details">
+      <p><strong>Order ID:</strong> #{{ order_id }}</p>
+      <p><strong>Payment Method:</strong> {{ payment_method }}</p>
+      <p><strong>Order Summary:</strong></p>
+      <ul>
+        {% for item in items %}
+        <li>
+          <strong>{{ item.quantity }}x {{ item.product_name }}</strong> — GHS {{ "%.2f"|format(item.price) }} each
+        </li>
+        {% endfor %}
+      </ul>
+      <p><strong>Total Amount:</strong> <span style="color: green;">GHS {{ "%.2f"|format(total) }}</span></p>
+    </div>
+
+    <p>If you have any questions or need help, feel free to reply to this email or contact our support team.</p>
+
+    <p>We appreciate your business and hope to serve you again soon!</p>
+
+  </div>
+</body>
+</html>
