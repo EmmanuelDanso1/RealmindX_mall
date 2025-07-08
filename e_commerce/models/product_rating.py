@@ -1,4 +1,4 @@
-from e_commerce import db
+from extensions import db
 
 class ProductRating(db.Model):
     __tablename__ = 'product_rating'

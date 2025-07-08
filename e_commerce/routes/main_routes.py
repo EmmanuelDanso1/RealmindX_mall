@@ -2,7 +2,8 @@ from flask import Blueprint, render_template, request, flash, redirect, url_for,
 from flask_login import login_required, current_user
 from flask_mail import Mail,Message
 import os
-from e_commerce import db, mail
+from e_commerce.utils.helpers import generate_random_order_id
+from extensions import db, mail
 from e_commerce.models import Product, ProductRating, NewsletterSubscriber, Category,PromotionFlier, Order, OrderItem, InfoDocument
 from e_commerce.utils.token import generate_verification_token, confirm_verification_token
 
@@ -35,20 +36,26 @@ def view_product(product_id):
         user_rating = ProductRating.query.filter_by(user_id=current_user.id, product_id=product_id).first()
     return render_template("product_detail.html", product=product, user_rating=user_rating)
 
+from sqlalchemy import func
+
 @main_bp.route('/track-your-order', methods=['GET', 'POST'])
 def track_order():
     order = None
     if request.method == 'POST':
-        order_id = request.form['order_id']
-        billing_email = request.form['billing_email']
-        
-        # Query the order by ID + email to verify
-        order = Order.query.filter_by(id=order_id, email=billing_email).first()
+        order_id = request.form['order_id'].strip()
+        billing_email = request.form['billing_email'].strip().lower()
+
+        # Query the order using alphanumeric order_id and case-insensitive email
+        order = Order.query.filter(
+            Order.order_id == order_id,
+            func.lower(Order.email) == billing_email
+        ).first()
 
         if not order:
-            flash("No order found with that ID and email.", "warning")
+            flash("No order found with that Order ID and Email address.", "warning")
 
     return render_template("track_order.html", order=order)
+
 
 # NewsLetter subscription
 @main_bp.route('/subscribe', methods=['POST'])
@@ -172,11 +179,12 @@ def delete_ordered_product(product_id):
 
 
 #  order successful
-@main_bp.route('/order-success/<int:order_id>')
+@main_bp.route('/order-success/<string:order_id>')
 @login_required
 def order_success(order_id):
-    order = Order.query.get_or_404(order_id)
+    order = Order.query.filter_by(order_id=order_id).first_or_404()
     return render_template('order_success.html', order=order)
+
 
 
 # autocomplete text

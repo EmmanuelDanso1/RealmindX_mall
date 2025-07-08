@@ -1,9 +1,10 @@
-from e_commerce import db
+from extensions import db
 from datetime import datetime
 # models.py
 
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    order_id = db.Column(db.String(50), unique=True, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     full_name = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(120), nullable=False)

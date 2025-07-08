@@ -1,4 +1,4 @@
-from e_commerce import db
+from extensions import db
 from datetime import datetime
 
 class NewsletterSubscriber(db.Model):

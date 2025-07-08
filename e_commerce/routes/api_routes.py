@@ -1,10 +1,10 @@
 from flask import request, jsonify, Blueprint, current_app
 from werkzeug.utils import secure_filename
 from e_commerce.models import Product, Category, InfoDocument, Order, PromotionFlier, NewsletterSubscriber
-from e_commerce import db
+from extensions import db
 import os
 import json
-from e_commerce.utils.helpers import allowed_file, allowed_image_file
+from e_commerce.utils.helpers import allowed_file, allowed_image_file, generate_random_order_id
 from flask import send_from_directory
 import traceback
 
@@ -333,10 +333,10 @@ def delete_info_document(id):
         return jsonify({'error': str(e)}), 400
 
 # update for status check
-@api_bp.route('/api/orders/<int:order_id>/status', methods=['POST'])
+@api_bp.route('/api/orders/<string:order_id>/status', methods=['POST'])
 def update_order_status_api(order_id):
-    
-    order = Order.query.filter_by(id=order_id).first()
+    # Use original_order_id here, which is a string
+    order = Order.query.filter_by(order_id=order_id).first()
     if not order:
         return jsonify({'error': 'Order not found'}), 404
 
@@ -352,6 +352,7 @@ def update_order_status_api(order_id):
     db.session.commit()
 
     return jsonify({'success': True, 'status': new_status})
+
 
 # recieves post api
 @api_bp.route('/api/fliers', methods=['POST'])

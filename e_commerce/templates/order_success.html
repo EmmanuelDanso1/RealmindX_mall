@@ -4,9 +4,9 @@
 {% block content %}
 <div class="container my-5">
   <div class="alert alert-success text-center p-4 shadow-sm rounded">
-    <h4 class="mb-3">Thank you for your order!. Please check your Email for confirmation message</h4>
+    <h5 class="mb-3">Thank you for your order!. Please check your Email for confirmation message</h5>
     <p>Your order has been successfully placed. Kindly save your Order ID, you’ll need it to track your order.</p>
-    <p>Your <strong>Order ID</strong> is <span class="text-primary">{{ order.id }}</span></p>
+    <p>Your <strong>Order ID</strong> is <strong>{{ order.order_id }}</strong></p>
     <p><strong>Payment Method:</strong> {{ order.payment_method|capitalize }}</p>
     <p><strong>Total Amount:</strong> GH₵{{ '%.2f'|format(order.total_amount) }}</p>
     <p><strong>Billing Name:</strong> {{ order.full_name }}</p>

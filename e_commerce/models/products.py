@@ -1,5 +1,5 @@
 from datetime import datetime
-from e_commerce import db
+from extensions import db
 
 class Product(db.Model):
     __tablename__ = 'product'  # Optional, but makes FK references safer

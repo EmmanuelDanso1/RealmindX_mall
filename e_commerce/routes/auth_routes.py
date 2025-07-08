@@ -1,7 +1,7 @@
 from flask import request, jsonify, Blueprint, current_app, session
 from werkzeug.utils import secure_filename
 from flask_login import login_user, login_required, logout_user
-from e_commerce import db, mail
+from extensions import db, mail
 import os
 from flask_mail import Message
 from itsdangerous import URLSafeTimedSerializer

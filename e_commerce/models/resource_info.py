@@ -1,5 +1,5 @@
 from datetime import datetime
-from e_commerce import db
+from extensions import db
 
 class InfoDocument(db.Model):
     id = db.Column(db.Integer, primary_key=True)

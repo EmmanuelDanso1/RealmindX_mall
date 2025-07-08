@@ -1,19 +1,11 @@
 from flask import Flask, session
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager
-from flask_migrate import Migrate
 from dotenv import load_dotenv
 import os
-from flask_mail import Mail
+from extensions import db, migrate, login_manager, mail 
 
 # Load environment variables
 load_dotenv()
 
-# Initialize extensions (without app yet)
-db = SQLAlchemy()
-migrate = Migrate()
-login_manager = LoginManager()
-mail = Mail()
 
 def create_app():
     app = Flask(__name__)
