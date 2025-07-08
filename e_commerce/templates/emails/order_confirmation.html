@@ -78,14 +78,14 @@
   <div class="container">
     <!-- Logo -->
     <div class="logo mb-3">
-      <img src="{{ url_for('static', filename='images/brain.jpg') }}"
+      <img src="../static/images/brain.jpg"
           alt="RealMindX Logo"
           style="height: 60px; width: auto;">
     </div>
 
     <!-- Buttons -->
     <div class="actions">
-      <a href="https://yourdomain.com/shop">Shop Now</a><br>
+      <a href="https://yourdomain.com/shop">Shop Now</a>
       <a href="#">Track Order</a>
     </div>
 
@@ -93,9 +93,9 @@
     <h2>Your Order Has Been Successfully Placed!</h2>
     <p>Dear {{ full_name }},</p>
 
-    <p>Thank you for shopping with <strong>RealMindX Education Ltd</strong>!<br>
+    <p>Thank you for shopping with RealMindX Education Ltd!<br>
     We will contact you shortly to confirm your order details, so please keep your phone accessible.  
-    If you do not receive a confirmation call within <strong>One(1) business day</strong>, please reach out to our customer service.</p>
+    If you do not receive a confirmation call within One(1) business day, please reach out to our customer service.</p>
 
     <!-- Order Info -->
     <div class="order-details">
@@ -110,7 +110,7 @@
 
       <div class="section-title">Items</div>
       <table>
-        <thead>
+        <thead style="color: #0C2E60;">
           <tr>
             <th>Item</th>
             <th>Qty</th>
@@ -146,7 +146,7 @@
       </table>
     </div>
 
-    <p>Sincerely,<br><strong>RealMindX Education Ltd</strong></p>
+    <p>Sincerely,<br>RealMindX Education Ltd</p>
 
     <div class="mt-2">
       <!-- Facebook (default white) -->

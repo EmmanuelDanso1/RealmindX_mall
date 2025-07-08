@@ -69,7 +69,13 @@
           <select name="category" class="form-select me-2">
             <option value="">All Categories</option>
             {% for cat in categories %}
-            <option value="{{ cat.id }}">{{ cat.name }}</option>
+              <option value="{{ cat.id }}">
+                {% if cat.name|length in [3, 5] %}
+                  {{ cat.name.upper() }}
+                {% else %}
+                  {{ cat.name }}
+                {% endif %}
+              </option>
             {% endfor %}
           </select>
           <button class="btn text-white" style="background-color: #0C2E60;"><i class="fas fa-search"></i></button>
@@ -160,13 +166,21 @@
     </div>
     <div>
       <h6>Find It Fast</h6>
-      <ul class="list-group list-group-flush">
-        {% for cat in categories %}
-          <li class="list-group-item px-0">
-            <a href="{{ url_for('main.search', category=cat.id) }}" class="text-decoration-none">{{ cat.name }}</a>
-          </li>
-        {% endfor %}
-      </ul>
+    <ul class="list-group list-group-flush">
+      {% for cat in categories %}
+        <li class="list-group-item px-0">
+          <a href="{{ url_for('main.search', category=cat.id) }}" class="text-decoration-none">
+            <!-- change first five letters to capital -->
+            {% if cat.name|length in [3, 5] %}
+              {{ cat.name.upper() }}
+            {% else %}
+              {{ cat.name }}
+            {% endif %}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+
 
     </div>
     <div>
