@@ -1,8 +1,8 @@
-"""added new db
+"""changed db to postgresql
 
-Revision ID: 8dc87f65f175
+Revision ID: 90c9e72ace72
 Revises: 
-Create Date: 2025-07-07 15:32:54.116502
+Create Date: 2025-07-11 06:26:02.545639
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '8dc87f65f175'
+revision = '90c9e72ace72'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -52,7 +52,7 @@ def upgrade():
     sa.Column('username', sa.String(length=80), nullable=False),
     sa.Column('email', sa.String(length=120), nullable=False),
     sa.Column('password', sa.String(length=200), nullable=False),
-    sa.Column('date_joined', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
+    sa.Column('date_joined', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_user')),
     sa.UniqueConstraint('email', name=op.f('uq_user_email')),
     sa.UniqueConstraint('username', name=op.f('uq_user_username'))
