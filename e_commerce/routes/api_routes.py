@@ -1,6 +1,6 @@
 from flask import request, jsonify, Blueprint, current_app
 from werkzeug.utils import secure_filename
-from e_commerce.models import Product, Category, InfoDocument, Order, PromotionFlier, NewsletterSubscriber
+from e_commerce.models import Product, Category, InfoDocument, OrderItem, Order, PromotionFlier, NewsletterSubscriber
 from extensions import db
 import os
 import json
@@ -188,11 +188,19 @@ def delete_product_api(product_id):
     product = Product.query.get_or_404(product_id)
 
     try:
+        # Optional: Check for order dependency
+        used = OrderItem.query.filter_by(product_id=product.id).first()
+        if used:
+            return jsonify({'error': 'Product is used in orders'}), 400
+
         db.session.delete(product)
         db.session.commit()
         return jsonify({'message': f'Product {product.name} deleted'}), 200
+
     except Exception as e:
         return jsonify({'error': 'Failed to delete product', 'details': str(e)}), 500
+
+
 
 # recieve  info from learning platform
 @api_bp.route('/api/info', methods=['POST'])

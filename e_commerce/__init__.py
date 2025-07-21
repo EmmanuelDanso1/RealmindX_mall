@@ -25,9 +25,13 @@ def create_app():
     
     # Ensure upload folder exists
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-
     # Initialize extensions
-    db.init_app(app)
+    try:
+        db.init_app(app)
+        print("Database connected successfully.")
+    except Exception as e:
+        print(f"Database connection failed: {e}")
+    
     migrate.init_app(app, db)
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
