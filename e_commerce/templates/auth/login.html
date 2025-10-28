@@ -1,32 +1,67 @@
-{% extends "index.html"  %}
+{% extends "index.html" %}
 
 {% block content %}
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card shadow-lg p-4">
-                    <h2 class="text-center mb-4"> Login </h2>
-                        <form method="POST">
-                            {{ form.hidden_tag() }}  <!-- Ensure CSRF token is included -->
-                        
-                            <div>
-                                <label>Email</label>
-                                {{ form.email(class="form-control", placeholder="Enter email") }}
-                            </div><br>
-                            
-                            <div>
-                                <label>Password</label>
-                                {{ form.password(class="form-control", placeholder="Enter password") }}
-                            </div><br>
-                            <button type="submit" class="btn btn-primary">Submit</button>
-                        </form>
-                        <a href="{{ url_for('auth.user_signup') }}" style="text-decoration: none;">Don't have an account? Sign up</a><br>
-                        <div class="text-center">
-                            <a href="{{ url_for('auth.forgot_password') }}" style="color: red; text-decoration: none;">Forgot password?</a>
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow-lg p-4 border-0 rounded-4">
+        <h2 class="text-center mb-4 fw-bold">Login</h2>
 
-                        </div>
-                </div>
+        <form method="POST">
+          {{ form.hidden_tag() }}  <!-- CSRF protection -->
+
+          <!-- Email -->
+          <div class="mb-3">
+            <label>Email</label>
+            {{ form.email(class="form-control", placeholder="Enter email") }}
+          </div>
+
+          <!-- Password -->
+          <div class="mb-3">
+            <label>Password</label>
+            <div class="input-group">
+              {{ form.password(class="form-control", id="password", placeholder="Enter password") }}
+              <button type="button" class="btn btn-outline-secondary" id="togglePassword">
+                <i class="fa fa-eye"></i>
+              </button>
             </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="d-grid mt-3">
+            <button type="submit" class="btn btn-primary fw-semibold">Submit</button>
+          </div>
+        </form>
+
+        <!-- Links -->
+        <div class="text-center mt-3">
+          <a href="{{ url_for('auth.user_signup') }}" class="text-decoration-none">
+            Don't have an account? <span class="fw-semibold">Sign up</span>
+          </a>
         </div>
-    </div><br>
+
+        <div class="text-center mt-2">
+          <a href="{{ url_for('auth.forgot_password') }}" style="color: red; text-decoration: none;">
+            Forgot password?
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Password Toggle Script -->
+<script>
+  const togglePassword = document.getElementById('togglePassword');
+  const passwordInput = document.getElementById('password');
+  const icon = togglePassword.querySelector('i');
+
+  togglePassword.addEventListener('click', () => {
+    const isHidden = passwordInput.type === 'password';
+    passwordInput.type = isHidden ? 'text' : 'password';
+    icon.classList.toggle('fa-eye');
+    icon.classList.toggle('fa-eye-slash');
+  });
+</script>
+
 {% endblock %}

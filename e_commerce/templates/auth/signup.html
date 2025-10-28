@@ -1,39 +1,85 @@
-{% extends "index.html"  %}
+{% extends "index.html" %}
 
 {% block content %}
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card shadow-lg p-4">
-                    <h2 class="text-center mb-4"> Sign Up</h2>
-                    <form method="POST">
-                        {{ form.hidden_tag() }}  <!-- Ensure CSRF token is included -->
-                        
-                        <div>
-                            <label>Full Name</label>
-                            {{ form.username(class="form-control", placeholder="Enter username") }}
-                        </div><br>
-                        
-                        <div>
-                            <label>Email</label>
-                            {{ form.email(class="form-control", placeholder="Enter email") }}
-                        </div><br>
-                        
-                        <div>
-                            <label>Password</label>
-                            {{ form.password(class="form-control", placeholder="Enter password") }}
-                        </div><br>
-                        
-                        <div>
-                            <label>Confirm Password</label>
-                            {{ form.confirm_password(class="form-control", placeholder="Confirm password") }}
-                        </div><br>
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                    </form>
-                    <a href="{{ url_for('auth.login') }}" style="text-decoration: none;">Already have an account? Login</a>
-                </div>
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow-lg p-4 border-0 rounded-4">
+        <h2 class="text-center mb-4 fw-bold">Sign Up</h2>
+
+        <form method="POST">
+          {{ form.hidden_tag() }}  <!-- CSRF protection -->
+
+          <!-- Full Name -->
+          <div class="mb-3">
+            <label>Full Name</label>
+            {{ form.username(class="form-control", placeholder="Enter full name") }}
+          </div>
+
+          <!-- Email -->
+          <div class="mb-3">
+            <label>Email</label>
+            {{ form.email(class="form-control", placeholder="Enter email") }}
+          </div>
+
+          <!-- Password -->
+          <div class="mb-3">
+            <label>Password</label>
+            <div class="position-relative">
+              {{ form.password(class="form-control", id="password", placeholder="Enter password") }}
+              <i class="fa fa-eye position-absolute top-50 end-0 translate-middle-y me-3 text-muted"
+                 id="togglePassword" style="cursor: pointer;"></i>
             </div>
+          </div>
+
+          <!-- Confirm Password -->
+          <div class="mb-3">
+            <label>Confirm Password</label>
+            <div class="position-relative">
+              {{ form.confirm_password(class="form-control", id="confirmPassword", placeholder="Confirm password") }}
+              <i class="fa fa-eye position-absolute top-50 end-0 translate-middle-y me-3 text-muted"
+                 id="toggleConfirmPassword" style="cursor: pointer;"></i>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="d-grid mt-3">
+            <button type="submit" class="btn btn-primary fw-semibold">Submit</button>
+          </div>
+        </form>
+
+        <!-- Login Link -->
+        <div class="text-center mt-3">
+          <a href="{{ url_for('auth.login') }}" class="text-decoration-none">
+            Already have an account? <span class="fw-semibold">Login</span>
+          </a>
         </div>
-        
-    </div><br>
+      </div>
+    </div>
+  </div>
+</div><br>
+
+<!-- Password Toggle Script -->
+<script>
+  // Toggle for main password
+  const togglePassword = document.getElementById('togglePassword');
+  const passwordInput = document.getElementById('password');
+  togglePassword.addEventListener('click', () => {
+    const isHidden = passwordInput.type === 'password';
+    passwordInput.type = isHidden ? 'text' : 'password';
+    togglePassword.classList.toggle('fa-eye');
+    togglePassword.classList.toggle('fa-eye-slash');
+  });
+
+  // Toggle for confirm password
+  const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+  const confirmPasswordInput = document.getElementById('confirmPassword');
+  toggleConfirmPassword.addEventListener('click', () => {
+    const isHidden = confirmPasswordInput.type === 'password';
+    confirmPasswordInput.type = isHidden ? 'text' : 'password';
+    toggleConfirmPassword.classList.toggle('fa-eye');
+    toggleConfirmPassword.classList.toggle('fa-eye-slash');
+  });
+</script>
+
 {% endblock %}
