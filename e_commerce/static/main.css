@@ -1,3 +1,191 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Arimo:wght@400;500&display=swap');
+/* logo */
+body {
+  background-color: #143760; /* blue backdrop */
+}
+
+h1, h2,h3,h4,h5,h6{
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  color: #000000;
+}
+
+p, a, span, li, button {
+  font-family: 'Arimo', sans-serif;
+  font-weight: 400;
+  color: #000000;
+}   
+.navbar {
+  background-color: #ffffff !important;
+  box-shadow: none;
+}
+
+.navbar .form-control,
+.navbar .form-select {
+  border-radius: 50px;
+  border: 1px solid #143760;
+}
+
+.navbar .btn {
+  border-radius: 50px;
+  font-weight: 600;
+}
+
+.navbar .btn-outline-dark:hover {
+  background-color: #143760;
+  color: #fff;
+}
+
+.navbar .btn-outline-primary {
+  border-color: #143760;
+  color: #143760;
+}
+
+.navbar .btn-outline-primary:hover {
+  background-color: #143760;
+  color: #fff;
+}
+
+/* =========================
+   FOOTER STYLING
+   ========================= */
+footer.footer {
+  background-color: #143760;
+  color: #ffffff;
+  font-family: 'Arimo', sans-serif;
+  padding: 60px 0 30px;
+}
+
+/* Section titles */
+footer h5 {
+  color: #ffcc01;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+/* Footer logo */
+.footer-logo {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  color: #ffcc01;
+  font-size: 1.3rem;
+}
+
+/* Text and links */
+footer p, footer li, footer a {
+  color: #ffffff;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+footer a:hover {
+  color: #ffcc01;
+}
+
+/* Social Icons */
+footer .social-icons a {
+  display: inline-block;
+  margin-right: 10px;
+  font-size: 18px;
+  transition: transform 0.3s ease;
+}
+
+footer .social-icons a:hover {
+  transform: translateY(-3px);
+}
+
+footer .fa-x-twitter { color: #000; }
+footer .fa-facebook { color: #1877F2; }
+footer .fa-instagram { color: #E1306C; }
+footer .fa-youtube { color: #FF0000; }
+footer .fa-whatsapp { color: #25D366; }
+
+/* Copyright */
+footer small {
+  font-size: 0.85rem;
+  color: #ddd;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  footer {
+    text-align: center;
+  }
+
+  footer .social-icons a {
+    margin: 0 5px;
+  }
+}
+
+
+  .btn-contact {
+    background-color: #ffcc01;
+    color: #000;
+    font-weight: 700;
+    border: none;
+    border-radius: 50px;
+    padding: 10px 30px;
+    margin-top: 10px;
+    transition: 0.3s ease;
+  }
+
+  .btn-contact:hover {
+    background-color: #ffdb4d;
+  }
+
+  .footer-bottom {
+    text-align: center;
+    margin-top: 40px;
+    border-top: 1px solid rgba(255,255,255,0.2);
+    padding-top: 20px;
+    font-size: 0.9rem;
+    color: #ffffff;
+  }
+
+  @media (max-width: 992px) {
+    footer .col-md-3, footer .col-md-4 {
+      margin-bottom: 30px;
+    }
+  }
+
+/* Newsletter */
+.newsletter-section {
+    background-color: #ffcc01;
+    font-family: 'Arimo', sans-serif;
+  }
+
+  .newsletter-text {
+    color: #222;
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .newsletter-form input {
+    border: none;
+    padding: 0.6rem 1rem;
+    font-family: 'Arimo', sans-serif;
+  }
+
+  .newsletter-form input:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(0,0,0,0.2);
+  }
+
+  .newsletter-form button {
+    font-family: 'Arimo', sans-serif;
+  }
+
+  @media (max-width: 768px) {
+    .newsletter-section .container {
+      flex-direction: column;
+      text-align: center;
+    }
+    .newsletter-form {
+      justify-content: center;
+    }
+  }
 .track-form input, .newsletter input, .track-form button, .newsletter button {
     border-radius: 30px;
     padding: 10px 20px;

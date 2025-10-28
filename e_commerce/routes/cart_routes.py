@@ -250,7 +250,7 @@ def checkout():
                     'Content-Type': 'application/json'
                 }
                 api_res = requests.post(
-                    'http://127.0.0.1:5000/api/orders',
+                    f'{os.getenv('API_BASE_URL')}/orders',
                     json=api_data,
                     headers=api_headers,
                     timeout=10
@@ -358,7 +358,7 @@ def payment_callback():
                 'Content-Type': 'application/json'
             }
             api_res = requests.post(
-                'http://127.0.0.1:5000/api/orders',
+                f'{os.getenv('API_BASE_URL')}/orders',
                 json=api_data,
                 headers=api_headers,
                 timeout=10
