@@ -157,21 +157,21 @@
 </section>
 
 <!-- FOOTER -->
-<footer class="footer">
-  <div class="container-fluid py-5 " style="background-color: #143670; color: white; padding: 40px 20px;">
-    <div class="row justify-content-between">
+<footer class="footer-section text-light pt-5 pb-4" style="background-color: #143670;">
+  <div class="container">
+    <div class="row gy-5" style="row-gap: 1rem !important;">
 
       <!-- RealMindX Bookshop -->
-      <div class="col-md-3 mb-4">
-        <h5 class="footer-logo " style="font-family: 'Montserrat', sans-serif; color: #ffcc01;">RealMindX Bookshop</h5>
+      <div class="col-lg-3 col-md-6 text-md-start text-center">
+        <h5 class="footer-title" style="color: #ffcc01;">RealMindX Bookshop</h5>
         <p>Purchase all your stationeries at wholesale/retail prices. We provide both deliveries to all locations, and pickups.</p>
         <p><strong>Fast Delivery:</strong> within 48 hours</p>
         <p><strong>Open Hours:</strong><br>7am–5pm (Weekdays)<br>10am–2pm (Sat)</p>
       </div>
 
       <!-- Find It Fast -->
-      <div class="col-md-3 mb-4">
-        <h5 style="font-family: 'Montserrat', sans-serif; color: #ffcc01;">Find It Fast</h5>
+      <div class="col-lg-3 col-md-6 text-md-start text-center">
+        <h5 class="footer-title" style="color: #ffcc01;">Quick Links</h5>
         <ul class="list-unstyled">
           {% for cat in categories %}
           <li>
@@ -188,30 +188,31 @@
       </div>
 
       <!-- Contact -->
-      <div class="col-md-3 mb-4">
-        <h5 style="font-family: 'Montserrat', sans-serif; color: #ffcc01;">Contact</h5>
-        <p><i class="fa fa-map-marker-alt me-2"></i> Dome Pillar 2</p>
-        <p><i class="fa fa-envelope me-2"></i> <a href="mailto:realmindxgh@gmail.com">realmindxgh@gmail.com</a></p>
-        <p><i class="fa fa-phone me-2"></i> +233 55 803 9190</p>
-        <p><i class="fa fa-phone me-2"></i> +233 55 452 9493</p>
-        <p><i class="fa fa-phone me-2"></i> +233 55 132 4729</p>
+      <div class="col-lg-3 col-md-6 text-md-start text-center" style="line-height: 1.2;">
+        <h5 class="footer-title" style="color: #ffcc01; margin-bottom: 0.4rem;">Contact</h5>
+        <p style="margin-bottom: 0.2rem;"><i class="fa fa-map-marker-alt me-2"></i> Dome Pillar 2</p>
+        <p style="margin-bottom: 0.2rem;"><i class="fa fa-envelope me-2"></i> <a href="mailto:realmindxgh@gmail.com">realmindxgh@gmail.com</a></p>
+        <p style="margin-bottom: 0.2rem;"><i class="fa fa-phone me-2"></i> +233 55 803 9190</p>
+        <p style="margin-bottom: 0.2rem;"><i class="fa fa-phone me-2"></i> +233 55 452 9493</p>
+        <p style="margin-bottom: 0.2rem;"><i class="fa fa-phone me-2"></i> +233 55 132 4729</p>
       </div>
 
+
       <!-- Follow Us -->
-      <div class="col-md-3 mb-4">
-        <h5 style="font-family: 'Montserrat', sans-serif; color: #ffcc01;">Follow Us</h5>
+      <div class="col-lg-3 col-md-6 text-md-start text-center">
+        <h5 class="footer-title" style="color: #ffcc01;">Follow Us</h5>
         <div class="social-icons mb-3">
-          <a href="https://x.com/RealMindXgh" target="_blank"  style="text-decoration:none;"> <i class="fa-brands fa-x-twitter" style="color:#000000; font-size:18px; margin-right:8px;"></i> </a> 
-          <a href="https://web.facebook.com/profile.php?id=61566941171883" target="_blank"  style="text-decoration:none;"> <i class="fa-brands fa-facebook" style="color:#1877F2; font-size:18px; margin-right:8px;"></i> </a>
-          <a href="https://www.instagram.com/realmindxgh/" target="_blank" style="text-decoration:none;"> <i class="fa-brands fa-instagram" style="color:#E1306C; font-size:18px; margin-right:8px;"></i> </a>
-          <a href="https://www.youtube.com/@realmindxgh" target="_blank" style="text-decoration:none;"> <i class="fa-brands fa-youtube" style="color:#FF0000; font-size:18px; margin-right:8px;"></i> </a>
+          <a href="https://x.com/RealMindXgh" target="_blank"  style="text-decoration:none;"> <i class="fa-brands fa-x-twitter" style="color:#000000; font-size:18px; "></i> </a> 
+          <a href="https://web.facebook.com/profile.php?id=61566941171883" target="_blank"  style="text-decoration:none;"> <i class="fa-brands fa-facebook" style="color:#1877F2; font-size:18px;"></i> </a>
+          <a href="https://www.instagram.com/realmindxgh/" target="_blank" style="text-decoration:none;"> <i class="fa-brands fa-instagram" style="color:#E1306C; font-size:18px;"></i> </a>
+          <a href="https://www.youtube.com/@realmindxgh" target="_blank" style="text-decoration:none;"> <i class="fa-brands fa-youtube" style="color:#FF0000; font-size:18px;"></i> </a>
           <a href="https://wa.link/d6x888" target="_blank" style="text-decoration:none;"> <i class="fa-brands fa-whatsapp" style="color:#25D366; font-size:18px;"></i> </a>
         </div>
       </div>
 
       <!-- Customer Care -->
-      <div class="col-md-3 mb-4">
-        <h5 style="font-family: 'Montserrat', sans-serif; color: #ffcc01;">Customer Care</h5>
+      <div class="col-lg-3 col-md-6 text-md-start text-center">
+        <h5 class="footer-title" style="color: #ffcc01;">Customer Care</h5>
         <ul class="list-unstyled">
           <li><a href="{{ url_for('auth.login') }}" class="text-white" style="text-decoration: none;">My Account</a></li>
           <li><a href="{{ url_for('auth.login') }}"class="text-white" style="text-decoration: none;">My Orders</a></li>

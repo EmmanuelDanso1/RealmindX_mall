@@ -1,5 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Arimo:wght@400;500&display=swap');
-/* logo */
+/*  Google Fonts for new navbar style */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Arimo:wght@400;500&display=swap');/* logo */
 body {
   background-color: #143760; /* blue backdrop */
 }
@@ -46,109 +46,122 @@ p, a, span, li, button {
   color: #fff;
 }
 
-/* =========================
-   FOOTER STYLING
-   ========================= */
-footer.footer {
-  background-color: #143760;
-  color: #ffffff;
+/* Footer Section */
+.footer-section {
+  background-color: #0b2c67;  /* Dark navy blue */
   font-family: 'Arimo', sans-serif;
-  padding: 60px 0 30px;
+  color: #ffffff;
+  padding-top: 2rem;          /* reduced from 5rem */
+  padding-bottom: 1.5rem;     /* reduced from 4rem */
 }
 
-/* Section titles */
-footer h5 {
-  color: #ffcc01;
+.footer-section .row {
+  row-gap: 1rem !important;   /* reduce spacing between columns */
+}
+
+/* Footer Titles */
+.footer-title {
   font-family: 'Montserrat', sans-serif;
   font-weight: 700;
-  margin-bottom: 20px;
-}
-
-/* Footer logo */
-.footer-logo {
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 800;
   color: #ffcc01;
-  font-size: 1.3rem;
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;     /* tighter title spacing */
+  letter-spacing: 0.5px;
 }
 
-/* Text and links */
-footer p, footer li, footer a {
+/* Footer Links */
+.footer-link {
   color: #ffffff;
-  font-size: 0.95rem;
   text-decoration: none;
+  display: block;
+  margin-bottom: 0.3rem;      /* reduced spacing */
+  font-size: 0.95rem;
   transition: color 0.3s ease;
 }
 
-footer a:hover {
-  color: #ffcc01;
+.footer-link:hover {
+  color: #FFD700;
+}
+
+/* Footer Text */
+.footer-section p,
+.footer-section small,
+.footer-section li,
+.footer-section a {
+  font-family: 'Arimo', sans-serif;
+  color: #dcdcdc;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  margin-bottom: 0.3rem !important;
+}
+
+/* Remove list spacing */
+.footer-section ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 /* Social Icons */
-footer .social-icons a {
-  display: inline-block;
-  margin-right: 10px;
-  font-size: 18px;
-  transition: transform 0.3s ease;
+.social-icons {
+  display: flex;
+  justify-content: center;      /* centers them on smaller screens */
+  flex-wrap: wrap;
+  gap: 4px;                     /* tight spacing between icons */
 }
 
-footer .social-icons a:hover {
+/* Social Icons */
+.social-icons a {
+  color: white;
+  font-size: 1.2rem;
+  margin-right: 0px;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.social-icons a:hover {
+  color: #ffcc01;
   transform: translateY(-3px);
 }
 
-footer .fa-x-twitter { color: #000; }
-footer .fa-facebook { color: #1877F2; }
-footer .fa-instagram { color: #E1306C; }
-footer .fa-youtube { color: #FF0000; }
-footer .fa-whatsapp { color: #25D366; }
-
-/* Copyright */
-footer small {
-  font-size: 0.85rem;
-  color: #ddd;
+/* Contact Us Button */
+.footer-section .btn {
+  margin-top: 1rem;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  footer {
+/* Contact Us Button */
+.btn-warning {
+  background-color: #ffcc01 !important;
+  color: #000000 !important;
+  border: none !important;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+/* Add a hover effect */
+.btn-warning:hover {
+  background-color: #e6b800 !important; /* slightly darker gold */
+  color: #000 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive Layout */
+@media (max-width: 992px) {
+  .footer-section {
     text-align: center;
   }
-
-  footer .social-icons a {
-    margin: 0 5px;
+  .footer-title {
+    margin-top: 20px;
   }
-}
-
-
-  .btn-contact {
-    background-color: #ffcc01;
-    color: #000;
-    font-weight: 700;
-    border: none;
-    border-radius: 50px;
-    padding: 10px 30px;
+  .social-icons a {
+    margin: 0 8px;
+  }
+  .btn-warning {
     margin-top: 10px;
-    transition: 0.3s ease;
   }
+}
 
-  .btn-contact:hover {
-    background-color: #ffdb4d;
-  }
-
-  .footer-bottom {
-    text-align: center;
-    margin-top: 40px;
-    border-top: 1px solid rgba(255,255,255,0.2);
-    padding-top: 20px;
-    font-size: 0.9rem;
-    color: #ffffff;
-  }
-
-  @media (max-width: 992px) {
-    footer .col-md-3, footer .col-md-4 {
-      margin-bottom: 30px;
-    }
-  }
 
 /* Newsletter */
 .newsletter-section {
