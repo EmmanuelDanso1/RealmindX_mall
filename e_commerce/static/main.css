@@ -102,6 +102,20 @@ p, a, span, li, button {
   list-style: none;
 }
 
+/* footer align */
+/* MOBILE VIEW: Left-align text */
+@media (max-width: 576px) {
+  .footer-section .text-center,
+  .footer-section [class*="text-md-start"] {
+    text-align: left !important;
+  }
+
+  .footer-section .social-icons {
+    justify-content: flex-start !important; /* align icons left */
+  }
+}
+
+
 /* Social Icons */
 .social-icons {
   display: flex;
