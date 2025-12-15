@@ -117,10 +117,15 @@ def receive_product():
 @api_bp.route('/api/products', methods=['GET'])
 def get_products():
     page = request.args.get('page', 1, type=int)
-    per_page = request.args.get('per_page', 10, type=int)  # default 10
+    per_page = request.args.get('per_page', 10, type=int)
 
-    query = Product.query.order_by(Product.date_created.desc())
-    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    pagination = Product.query.order_by(
+        Product.date_created.desc()
+    ).paginate(page=page, per_page=per_page, error_out=False)
+
+    current_app.logger.info(
+        f"📦 Products fetched page={page}, per_page={per_page}"
+    )
 
     products_data = []
     for product in pagination.items:
@@ -131,6 +136,7 @@ def get_products():
             'price': product.price,
             'discount_percentage': product.discount_percentage,
             'image_filename': product.image_filename,
+            'image_url': product.image_url,
             'in_stock': product.in_stock,
             'author': product.author,
             'brand': product.brand,
@@ -155,6 +161,7 @@ def get_products():
 def upload_image():
     token = request.headers.get('Authorization')
     if token != f"Bearer {os.getenv('API_TOKEN')}":
+        current_app.logger.warning("Unauthorized image upload attempt")
         return jsonify({'error': 'Unauthorized'}), 401
 
     image = request.files.get('image')
@@ -162,27 +169,44 @@ def upload_image():
         return jsonify({'error': 'No file received'}), 400
 
     filename = secure_filename(image.filename)
-    upload_path = os.path.join(current_app.root_path, 'static/uploads', filename)
+    upload_path = os.path.join(
+        current_app.root_path, 'static', 'uploads', filename
+    )
+    os.makedirs(os.path.dirname(upload_path), exist_ok=True)
     image.save(upload_path)
-    return jsonify({'message': 'Image uploaded'}), 201
+
+    current_app.logger.info(f"Image uploaded: {filename}")
+
+    return jsonify({
+        'message': 'Image uploaded',
+        'image_url': f"https://bookshop.realmindxgh.com/static/uploads/{filename}"
+    }), 201
+
 
 # edit product
 @api_bp.route('/api/products/<int:product_id>', methods=['PUT'])
 def update_product_api(product_id):
     token = request.headers.get('Authorization')
-    if not token or token != f"Bearer {API_TOKEN}":
+    if token != f"Bearer {API_TOKEN}":
+        current_app.logger.warning("Unauthorized product update")
         return jsonify({'error': 'Unauthorized'}), 401
 
     product = Product.query.get_or_404(product_id)
-    data = request.json
 
     try:
-        product.name = data['name']
-        product.description = data['description']
-        product.price = data['price']
-        product.discount_percentage = data.get('discount_percentage', 0.0)
-        product.in_stock = data.get('in_stock', True)
-        product.image_filename = data.get('image_filename', product.image_filename)
+        data_json = request.form.get('data')
+        data = json.loads(data_json) if data_json else {}
+
+        current_app.logger.info(f"Updating product ID {product.id}")
+
+        # Basic fields
+        product.name = data.get('name', product.name)
+        product.description = data.get('description', product.description)
+        product.price = data.get('price', product.price)
+        product.discount_percentage = data.get(
+            'discount_percentage', product.discount_percentage
+        )
+        product.in_stock = data.get('in_stock', product.in_stock)
 
         # Optional fields
         product.author = data.get('author')
@@ -191,7 +215,7 @@ def update_product_api(product_id):
         product.level = data.get('level')
         product.subject = data.get('subject')
 
-        # Handle category update (optional)
+        # Category
         category_name = data.get('category', '').strip().title()
         if category_name:
             category = Category.query.filter_by(name=category_name).first()
@@ -200,44 +224,91 @@ def update_product_api(product_id):
                 db.session.add(category)
                 db.session.commit()
             product.category_id = category.id
+
+        # IMAGE UPDATE
         file = request.files.get('image')
         if file:
+            old_image = product.image_filename
+
             filename = secure_filename(file.filename)
-            upload_path = os.path.join(current_app.root_path, 'static', 'uploads', filename)
+            upload_path = os.path.join(
+                current_app.root_path, 'static', 'uploads', filename
+            )
             os.makedirs(os.path.dirname(upload_path), exist_ok=True)
             file.save(upload_path)
+
             product.image_filename = filename
+            product.image_url = (
+                f"https://bookshop.realmindxgh.com/static/uploads/{filename}"
+            )
+
+            current_app.logger.info(
+                f"Image updated for product {product.id}: {filename}"
+            )
+
+            # DELETE OLD IMAGE
+            if old_image:
+                old_path = os.path.join(
+                    current_app.root_path, 'static', 'uploads', old_image
+                )
+                if os.path.exists(old_path):
+                    os.remove(old_path)
+                    current_app.logger.info(
+                        f"Old image removed: {old_image}"
+                    )
 
         db.session.commit()
-        return jsonify({'message': 'Product updated'}), 200
+
+        return jsonify({
+            'message': 'Product updated',
+            'image_url': product.image_url
+        }), 200
 
     except Exception as e:
+        current_app.logger.error(f"Update failed: {e}")
         return jsonify({'error': str(e)}), 400
 
 
-
-# delete product
 @api_bp.route('/api/products/<int:product_id>', methods=['DELETE'])
 def delete_product_api(product_id):
     token = request.headers.get('Authorization')
-    if not token or token != f"Bearer {API_TOKEN}":
+    if token != f"Bearer {API_TOKEN}":
+        current_app.logger.warning("Unauthorized delete attempt")
         return jsonify({'error': 'Unauthorized'}), 401
 
     product = Product.query.get_or_404(product_id)
 
     try:
-        # Optional: Check for order dependency
         used = OrderItem.query.filter_by(product_id=product.id).first()
         if used:
             return jsonify({'error': 'Product is used in orders'}), 400
 
+        # DELETE IMAGE
+        if product.image_filename:
+            image_path = os.path.join(
+                current_app.root_path, 'static', 'uploads', product.image_filename
+            )
+            if os.path.exists(image_path):
+                os.remove(image_path)
+                current_app.logger.info(
+                    f"Deleted image: {product.image_filename}"
+                )
+
         db.session.delete(product)
         db.session.commit()
-        return jsonify({'message': f'Product {product.name} deleted'}), 200
+
+        current_app.logger.info(
+            f"🗑️ Product deleted: {product.name} (ID {product.id})"
+        )
+
+        return jsonify({'message': 'Product deleted'}), 200
 
     except Exception as e:
-        return jsonify({'error': 'Failed to delete product', 'details': str(e)}), 500
-
+        current_app.logger.error(f"Delete failed: {e}")
+        return jsonify({
+            'error': 'Failed to delete product',
+            'details': str(e)
+        }), 500
 
 
 # recieve  info from learning platform

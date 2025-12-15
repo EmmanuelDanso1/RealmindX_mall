@@ -1,7 +1,7 @@
-from flask import Flask, session
+from flask import Flask, session,request
 from dotenv import load_dotenv
 import os
-from extensions import db, migrate, login_manager, mail 
+from extensions import db, migrate, login_manager, mail
 
 # Load environment variables
 load_dotenv()
@@ -28,6 +28,11 @@ def create_app():
     def log_image_requests():
         if request.path.startswith('/static/uploads/'):
             current_app.logger.info(f"Image requested: {request.path}")
+
+    logging.basicConfig(
+    level=logging.INFO,
+    format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s'
+    )
 
     # Ensure upload folder exists
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
