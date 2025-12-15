@@ -23,6 +23,12 @@ def create_app():
     # Load config
     app.config.from_object('config.Config')
     
+    # logging
+    @app.before_request
+    def log_image_requests():
+        if request.path.startswith('/static/uploads/'):
+            current_app.logger.info(f"Image requested: {request.path}")
+
     # Ensure upload folder exists
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     # Initialize extensions

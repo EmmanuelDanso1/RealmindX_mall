@@ -7,6 +7,9 @@ import json
 from e_commerce.utils.helpers import allowed_file, allowed_image_file, generate_random_order_id
 from flask import send_from_directory
 import traceback
+import logging
+
+logger = logging.getLogger(__name__)
 
 API_TOKEN = os.getenv("API_TOKEN")
 
@@ -16,22 +19,30 @@ api_bp = Blueprint('api', __name__)
 def uploaded_file(filename):
     return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)
 
+
 @api_bp.route('/api/products', methods=['POST'])
 def receive_product():
+    logger.info("/api/products called")
+
     token = request.headers.get('Authorization')
     if not token or token != f"Bearer {API_TOKEN}":
+        logger.warning("Unauthorized request")
         return jsonify({'error': 'Unauthorized'}), 401
 
     try:
+        # ---------- PRODUCT DATA ----------
         data_json = request.form.get('data')
         if not data_json:
+            logger.error("Missing product data")
             return jsonify({'error': 'Missing product data'}), 400
 
         data = json.loads(data_json)
+        logger.info(f"Product data received: {data.get('name')}")
 
-        # Validate category
+        # ---------- CATEGORY ----------
         category_name = data.get('category', '').strip().title()
         if not category_name:
+            logger.error("Category missing")
             return jsonify({'error': 'Category is required'}), 400
 
         category = Category.query.filter_by(name=category_name).first()
@@ -39,23 +50,38 @@ def receive_product():
             category = Category(name=category_name)
             db.session.add(category)
             db.session.commit()
+            logger.info(f"Category created: {category_name}")
+        else:
+            logger.info(f"Category found: {category_name}")
 
-        # IMAGE FILE
+        # ---------- IMAGE ----------
         file = request.files.get('image')
         if not file:
+            logger.error("Image file missing in request")
             return jsonify({'error': 'Image file is required'}), 400
 
+        logger.info(
+            f"Image received: filename={file.filename}, "
+            f"content_type={file.content_type}"
+        )
+
         filename = secure_filename(file.filename)
+        upload_dir = os.path.join(current_app.root_path, 'static', 'uploads')
+        upload_path = os.path.join(upload_dir, filename)
 
-        # ✅ SAVE IMAGE IN BOOKSHOP SERVER
-        upload_path = os.path.join(current_app.root_path, 'static', 'uploads', filename)
-        os.makedirs(os.path.dirname(upload_path), exist_ok=True)
-        file.save(upload_path)
+        try:
+            os.makedirs(upload_dir, exist_ok=True)
+            file.save(upload_path)
+            logger.info(f"Image saved at: {upload_path}")
+            logger.info(f"Image size: {os.path.getsize(upload_path)} bytes")
+        except Exception as img_err:
+            logger.exception(f"Image save failed: {img_err}")
+            return jsonify({'error': 'Failed to save image'}), 500
 
-        # Public URL for bookshop
         image_url = f"https://bookshop.realmindxgh.com/static/uploads/{filename}"
+        logger.info(f"Image URL generated: {image_url}")
 
-        # Create product
+        # ---------- PRODUCT ----------
         product = Product(
             name=data['name'],
             description=data['description'],
@@ -75,6 +101,8 @@ def receive_product():
         db.session.add(product)
         db.session.commit()
 
+        logger.info(f"Product saved: id={product.id}, name={product.name}")
+
         return jsonify({
             'message': 'Product synced',
             'id': product.id,
@@ -82,8 +110,8 @@ def receive_product():
         }), 201
 
     except Exception as e:
+        logger.exception("Unexpected error during product sync")
         return jsonify({'error': str(e)}), 400
-
 
 # pagination
 @api_bp.route('/api/products', methods=['GET'])
