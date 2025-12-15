@@ -2,6 +2,7 @@ from flask import Flask, session,request
 from dotenv import load_dotenv
 import os
 from extensions import db, migrate, login_manager, mail
+import logging
 
 # Load environment variables
 load_dotenv()
