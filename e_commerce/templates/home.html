@@ -15,11 +15,19 @@
             
             <!-- Image -->
             <div class="position-relative" style="height: 180px;">
-              <img 
-              src="{{ url_for('static', filename='uploads/' ~ product.image_filename) }}" 
-              class="card-img-top" 
-              alt="{{ product.name }}"
-              style="height: 100%; object-fit: cover; border-top-left-radius: .5rem; border-top-right-radius: .5rem;">
+              {% if product.image_url %}
+                <img 
+                  src="{{ product.image_url }}" 
+                  class="card-img-top" 
+                  alt="{{ product.name }}"
+                  style="height: 100%; object-fit: cover; border-top-left-radius: .5rem; border-top-right-radius: .5rem;">
+              {% elif product.image_filename %}
+                <img 
+                  src="{{ url_for('static', filename='uploads/' ~ product.image_filename) }}" 
+                  class="card-img-top" 
+                  alt="{{ product.name }}"
+                  style="height: 100%; object-fit: cover; border-top-left-radius: .5rem; border-top-right-radius: .5rem;">
+              {% endif %}
 
               {% if not product.in_stock %}
               <div class="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
