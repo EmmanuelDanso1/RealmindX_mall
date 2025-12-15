@@ -23,14 +23,13 @@ def receive_product():
         return jsonify({'error': 'Unauthorized'}), 401
 
     try:
-        # Get product data from form
         data_json = request.form.get('data')
         if not data_json:
             return jsonify({'error': 'Missing product data'}), 400
 
         data = json.loads(data_json)
 
-        # Validate and handle category
+        # Validate category
         category_name = data.get('category', '').strip().title()
         if not category_name:
             return jsonify({'error': 'Category is required'}), 400
@@ -41,15 +40,20 @@ def receive_product():
             db.session.add(category)
             db.session.commit()
 
-        # Handle image file
+        # IMAGE FILE
         file = request.files.get('image')
         if not file:
             return jsonify({'error': 'Image file is required'}), 400
 
         filename = secure_filename(file.filename)
+
+        # ✅ SAVE IMAGE IN BOOKSHOP SERVER
         upload_path = os.path.join(current_app.root_path, 'static', 'uploads', filename)
         os.makedirs(os.path.dirname(upload_path), exist_ok=True)
         file.save(upload_path)
+
+        # Public URL for bookshop
+        image_url = f"https://bookshop.realmindxgh.com/static/uploads/{filename}"
 
         # Create product
         product = Product(
@@ -57,7 +61,8 @@ def receive_product():
             description=data['description'],
             price=data['price'],
             discount_percentage=data.get('discount_percentage', 0.0),
-            image_filename=filename,  # ✅ use saved filename
+            image_filename=filename,
+            image_url=image_url,
             in_stock=data.get('in_stock', True),
             category_id=category.id,
             author=data.get('author'),
@@ -70,10 +75,15 @@ def receive_product():
         db.session.add(product)
         db.session.commit()
 
-        return jsonify({'message': 'Product synced', 'id': product.id}), 201
+        return jsonify({
+            'message': 'Product synced',
+            'id': product.id,
+            'image_url': image_url
+        }), 201
 
     except Exception as e:
         return jsonify({'error': str(e)}), 400
+
 
 # pagination
 @api_bp.route('/api/products', methods=['GET'])
