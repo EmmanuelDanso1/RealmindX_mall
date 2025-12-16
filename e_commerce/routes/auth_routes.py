@@ -11,53 +11,71 @@ from werkzeug.security import check_password_hash
 from werkzeug.security import check_password_hash, generate_password_hash
 from e_commerce.models import User
 from e_commerce.forms import UserSignupForm, LoginForm, PasswordResetForm, PasswordResetRequestForm
+from urllib.parse import urlparse, urljoin
 
 auth_bp = Blueprint('auth', __name__)
 
 s = URLSafeTimedSerializer(os.getenv('SECRET_KEY'))
-
 
 @auth_bp.route('/user/signup', methods=['GET', 'POST'])
 def user_signup():
     form = UserSignupForm()
     
     if form.validate_on_submit():
-        existing_email = User.query.filter_by(email=form.email.data).first()
-        if existing_email:
+        if User.query.filter_by(email=form.email.data).first():
             flash('Email already registered. Please log in.', 'danger')
             return redirect(url_for('auth.login'))
 
-        existing_username = User.query.filter_by(username=form.username.data).first()
-        if existing_username:
+        if User.query.filter_by(username=form.username.data).first():
             flash('Username already taken. Please choose another.', 'danger')
             return redirect(url_for('auth.user_signup'))
 
-        hashed_password = generate_password_hash(form.password.data)
         new_user = User(
             username=form.username.data,
             email=form.email.data,
-            password=hashed_password
+            password=generate_password_hash(form.password.data)
         )
         db.session.add(new_user)
         db.session.commit()
 
         login_user(new_user)
         flash('Account created successfully!', 'success')
-        return redirect(url_for('cart.checkout'))
+
+        # Redirect to shop
+        return redirect(url_for('main.shop'))
 
     return render_template('auth/signup.html', form=form)
+
+
+
+def is_safe_url(target):
+    ref_url = urlparse(request.host_url)
+    test_url = urlparse(urljoin(request.host_url, target))
+    return test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc
+
 
 @auth_bp.route('/user/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
+
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
+
         if user and check_password_hash(user.password, form.password.data):
             login_user(user)
-            next_page = session.pop('next', None)
-            return redirect(url_for(next_page)) if next_page else redirect(url_for('cart.checkout'))
+
+            next_page = request.args.get('next') or session.pop('next', None)
+
+            if next_page and is_safe_url(next_page):
+                return redirect(next_page)
+
+            #  Default redirect to shop
+            return redirect(url_for('main.shop'))
+
         flash('Invalid credentials', 'danger')
+
     return render_template('auth/login.html', form=form)
+
 
 @auth_bp.route('/logout', methods=['GET', 'POST'])
 @login_required

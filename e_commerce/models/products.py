@@ -14,7 +14,7 @@ class Product(db.Model):
     in_stock = db.Column(db.Boolean, default=True)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # ✅ New Optional Metadata Fields
+    #  New Optional Metadata Fields
     author = db.Column(db.String(120), nullable=True)
     brand = db.Column(db.String(120), nullable=True)
     grade = db.Column(db.String(50), nullable=True)
