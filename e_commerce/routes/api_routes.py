@@ -575,12 +575,22 @@ def delete_flier(flier_id):
  
         return jsonify({'error': str(e)}), 400
     
-@api_bp.route('/api/newsletter-subscribers')
+# Get verified newsletter subscribers
+@api_bp.route('/api/newsletter-subscribers', methods=['GET'])
 def get_newsletter_subscribers():
     token = request.headers.get('Authorization')
-    if not token or token != f"Bearer {API_TOKEN}":
+    if not token or token != f"Bearer {os.getenv('API_TOKEN')}":
         return jsonify({'error': 'Unauthorized'}), 401
 
     subscribers = NewsletterSubscriber.query.filter_by(is_verified=True).all()
+
     emails = [s.email for s in subscribers]
-    return jsonify({'subscribers': emails}), 200
+
+    current_app.logger.info(
+        f"Newsletter subscribers requested — {len(emails)} verified"
+    )
+
+    return jsonify({
+        'count': len(emails),
+        'subscribers': emails
+    }), 200

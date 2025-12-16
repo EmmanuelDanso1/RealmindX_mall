@@ -1,12 +1,103 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Confirm Your Subscription</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    .email-container {
+      max-width: 600px;
+      margin: 40px auto;
+      background-color: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .email-header {
+      background-color: #007bff;
+      color: #ffffff;
+      padding: 30px;
+      text-align: center;
+    }
+    .email-header h2 {
+      margin: 0;
+      font-size: 24px;
+    }
+    .email-body {
+      padding: 30px;
+      color: #333333;
+      line-height: 1.6;
+    }
+    .email-body p {
+      margin: 15px 0;
+    }
+    .confirm-button {
+      display: inline-block;
+      margin: 20px 0;
+      padding: 15px 40px;
+      background-color: #28a745;
+      color: #ffffff;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    .confirm-button:hover {
+      background-color: #218838;
+    }
+    .email-footer {
+      background-color: #f8f9fa;
+      padding: 20px;
+      text-align: center;
+      color: #6c757d;
+      font-size: 12px;
+    }
+    .button-container {
+      text-align: center;
+      margin: 25px 0;
+    }
+  </style>
 </head>
 <body>
-  <h2>Welcome to RealmindXEduMall Newsletter!</h2>
-  <p>Click the link below to confirm your subscription:</p>
-  <a href="{{ confirm_url }}">Confirm Subscription</a>
-  <p>If you didn't request this, please ignore this email.</p>
+  <div class="email-container">
+    <div class="email-header">
+      <h2>Welcome to RealmindXEduMall Newsletter!</h2>
+    </div>
+    
+    <div class="email-body">
+      <p>Thank you for subscribing to our newsletter!</p>
+      <p>To complete your subscription and start receiving updates, exclusive offers, and educational content, please confirm your email address by clicking the button below:</p>
+      
+      <div class="button-container">
+        <a href="{{ confirm_url }}" class="confirm-button">Confirm My Subscription</a>
+      </div>
+      
+      <p>Or copy and paste this link into your browser:</p>
+      <p style="word-break: break-all; color: #007bff;">{{ confirm_url }}</p>
+      
+      <p style="margin-top: 30px; color: #6c757d; font-size: 14px;">
+        <strong>Didn't request this?</strong><br>
+        If you didn't sign up for our newsletter, you can safely ignore this email. Your email address will not be added to our mailing list.
+      </p>
+    </div>
+    
+    <!-- Copyright -->
+      <div class="text-center mt-4 pt-3 border-top border-light">
+        <small id="copyright"></small>
+      </div>
+  </div>
 </body>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const currentYear = new Date().getFullYear();
+      document.getElementById("copyright").textContent =
+        `© ${currentYear} RealMindX Education. All rights reserved.`;
+    });
+  </script>
 </html>

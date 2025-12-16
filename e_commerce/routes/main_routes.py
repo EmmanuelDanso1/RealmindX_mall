@@ -57,47 +57,73 @@ def track_order():
     return render_template("track_order.html", order=order)
 
 
-# NewsLetter subscription
+# NewsLetter subscription for Bookshop
 @main_bp.route('/subscribe', methods=['POST'])
 def subscribe_newsletter():
     email = request.form.get('email')
+    
+    current_app.logger.info(f"[Bookshop] Newsletter subscription attempt for: {email}")
+
+    if not email:
+        current_app.logger.warning("[Bookshop] Subscription attempted with no email")
+        flash("Please provide a valid email address.", "danger")
+        return redirect(url_for('main.home'))
 
     existing = NewsletterSubscriber.query.filter_by(email=email).first()
     if existing:
+        current_app.logger.info(f"[Bookshop] Duplicate subscription attempt for: {email}")
         flash("Email is already subscribed.", "info")
         return redirect(url_for('main.home'))
 
-    token = generate_verification_token(email)
-    confirm_url = url_for('main.confirm_subscription', token=token, _external=True)
-    html = render_template('emails/confirm_newsletter.html', confirm_url=confirm_url)
+    try:
+        token = generate_verification_token(email)
+        confirm_url = url_for('main.confirm_subscription', token=token, _external=True)
+        html = render_template('emails/confirm_newsletter.html', confirm_url=confirm_url)
 
-    msg = Message("Confirm your newsletter subscription", recipients=[email], html=html)
-    mail.send(msg)
+        msg = Message("Confirm your newsletter subscription", recipients=[email], html=html)
+        mail.send(msg)
+        
+        current_app.logger.info(f"[Bookshop] Confirmation email sent to: {email}")
 
-    new_subscriber = NewsletterSubscriber(email=email, is_verified=False)
-    db.session.add(new_subscriber)
-    db.session.commit()
+        new_subscriber = NewsletterSubscriber(email=email, is_verified=False)
+        db.session.add(new_subscriber)
+        db.session.commit()
+        
+        current_app.logger.info(f"[Bookshop] New subscriber added (unverified): {email}")
 
-    flash("A confirmation email has been sent to verify your subscription.", "success")
+        flash("A confirmation email has been sent to verify your subscription.", "success")
+        
+    except Exception as e:
+        current_app.logger.exception(f"[Bookshop] Error during newsletter subscription for {email}: {e}")
+        db.session.rollback()
+        flash("An error occurred. Please try again later.", "danger")
+    
     return redirect(url_for('main.home'))
+
 
 @main_bp.route('/confirm-newsletter/<token>')
 def confirm_subscription(token):
+    current_app.logger.info("[Bookshop] Newsletter confirmation attempt")
+    
     email = confirm_verification_token(token)
     if not email:
+        current_app.logger.warning("[Bookshop] Invalid or expired confirmation token")
         flash("The confirmation link is invalid or has expired.", "danger")
         return redirect(url_for('main.home'))
 
     subscriber = NewsletterSubscriber.query.filter_by(email=email).first()
     if not subscriber:
+        current_app.logger.error(f"[Bookshop] Confirmation failed: No subscriber found for {email}")
         flash("No matching subscriber found.", "warning")
         return redirect(url_for('main.home'))
 
     if subscriber.is_verified:
+        current_app.logger.info(f"[Bookshop] Already verified: {email}")
         flash("Subscription already confirmed.", "info")
     else:
         subscriber.is_verified = True
         db.session.commit()
+        current_app.logger.info(f"[Bookshop] ✓ Subscription confirmed for: {email}")
         flash("Your subscription has been confirmed. Thank you!", "success")
 
     return redirect(url_for('main.home'))
