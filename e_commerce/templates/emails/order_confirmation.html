@@ -2,8 +2,6 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-
   <title>Your Order with RealMindX</title>
   <style>
     body {
@@ -48,7 +46,7 @@
       margin-top: 20px;
       margin-bottom: 10px;
     }
-    .order-details, .billing-info {
+    .order-details {
       background-color: #f9f9f9;
       padding: 15px;
       border-radius: 6px;
@@ -62,6 +60,20 @@
       border-bottom: 1px solid #ddd;
       padding: 8px;
       text-align: left;
+    }
+    .social-icons {
+      text-align: center;
+      margin: 20px 0;
+    }
+    .social-icons a {
+      display: inline-block;
+      margin: 0 8px;
+      text-decoration: none;
+    }
+    .social-icons img {
+      width: 32px;
+      height: 32px;
+      vertical-align: middle;
     }
     .footer {
       font-size: 14px;
@@ -77,16 +89,16 @@
 <body>
   <div class="container">
     <!-- Logo -->
-    <div class="logo mb-3">
-      <img src="../static/images/brain.jpg"
+    <div class="logo">
+      <img src="https://bookshop.realmindxgh.com/static/images/brain.jpg"
           alt="RealMindX Logo"
           style="height: 60px; width: auto;">
     </div>
 
     <!-- Buttons -->
     <div style="padding: 20px; text-align: center;">
-      <a href="https://yourdomain.com/shop" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-right: 10px;">Shop Now</a>
-      <a href="https://yourdomain.com/track-order/{{ order_id }}" style="background-color: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Track Order</a>
+      <a href="https://bookshop.realmindxgh.com" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-right: 10px;">Shop Now</a>
+      <a href="https://bookshop.realmindxgh.com/track-order" style="background-color: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Track Order</a>
     </div>
 
     <!-- Greeting -->
@@ -99,10 +111,10 @@
 
     <!-- Order Info -->
     <div class="order-details">
-      <p><strong>Your Order ID:</strong>{{ order_id }}</p>
+      <p><strong>Your Order ID:</strong> {{ order_id }}</p>
       <p><strong>Placed on:</strong> {{ order_date }}</p>
 
-      <div class="section-title text-center">Billing Info</div>
+      <div class="section-title">Billing Info</div>
       <p><strong>Name:</strong> {{ full_name }}</p>
       <p><strong>Address:</strong> {{ address }}</p>
       <p><strong>Tel:</strong> {{ phone }}</p>
@@ -148,34 +160,16 @@
 
     <p>Sincerely,<br>RealMindX Education Ltd</p>
 
-    <div class="mt-2">
-      <!-- Facebook (default white) -->
-      <a href="https://web.facebook.com/profile.php?id=61566941171883" target="_blank" class="me-2" style="color: white;">
-        <i class="fa-brands fa-facebook"></i>
-      </a>
-
-      <!-- Twitter (black) -->
-      <a href="https://x.com/RealMindXgh" target="_blank" class="me-2" style="color: black;">
-        <i class="fa-brands fa-x-twitter"></i>
-      </a>
-
-      <!-- Instagram (default white) -->
-      <a href="https://www.instagram.com/realmindxgh/" target="_blank" class="me-2" style="color:  #C13584;">
-        <i class="fa-brands fa-instagram"></i>
-      </a>
-
-      <!-- YouTube (red) -->
-      <a href="https://www.youtube.com/@realmindxgh" target="_blank" class="me-2" style="color: red;">
-        <i class="fa-brands fa-youtube"></i>
-      </a>
-
-      <!-- WhatsApp (green) -->
-      <a href="https://wa.link/d6x888" target="_blank" class="me-2" style="color: #25D366;">
-        <i class="fa-brands fa-whatsapp"></i>
-      </a>
-      <span>@realmindxgh</span>
-                
+    <!-- Social Media Icons (using simple text links for email compatibility) -->
+    <div class="social-icons">
+      <p style="margin-bottom: 10px;"><strong>Follow us @realmindxgh:</strong></p>
+      <a href="https://web.facebook.com/profile.php?id=61566941171883" target="_blank" style="color: #1877F2; text-decoration: none; margin: 0 10px;">Facebook</a> |
+      <a href="https://x.com/RealMindXgh" target="_blank" style="color: #000000; text-decoration: none; margin: 0 10px;">X</a> |
+      <a href="https://www.instagram.com/realmindxgh/" target="_blank" style="color: #E4405F; text-decoration: none; margin: 0 10px;">Instagram</a> |
+      <a href="https://www.youtube.com/@realmindxgh" target="_blank" style="color: #FF0000; text-decoration: none; margin: 0 10px;">YouTube</a> |
+      <a href="https://wa.link/d6x888" target="_blank" style="color: #25D366; text-decoration: none; margin: 0 10px;">WhatsApp</a>
     </div>
+
     <!-- Footer -->
     <div class="footer">
       <p>Customer service period: Monday–Saturday, 7AM to 5PM</p>

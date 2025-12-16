@@ -8,6 +8,9 @@ from extensions import db, mail
 from flask_mail import Message
 from datetime import datetime
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 cart_bp = Blueprint('cart', __name__)
 
@@ -135,6 +138,10 @@ def checkout():
         phone = request.form.get('phone', '')
 
         unique_order_id = get_random_unique_order_id()
+        
+        current_app.logger.info(
+            f"[Bookshop] Checkout initiated by user {current_user.id} - Order ID: {unique_order_id}"
+        )
 
         if payment_method == 'paystack':
             headers = {
@@ -157,6 +164,7 @@ def checkout():
             }
 
             try:
+                current_app.logger.info(f"[Bookshop] Initializing Paystack payment for order {unique_order_id}")
                 response = requests.post(
                     'https://api.paystack.co/transaction/initialize',
                     json=data,
@@ -176,19 +184,25 @@ def checkout():
                     'subtotal': subtotal,
                     'discount': discount
                 }
+                current_app.logger.info(f"[Bookshop] Paystack payment initialized for {unique_order_id}")
                 return redirect(payment_url)
 
             except requests.exceptions.Timeout:
+                current_app.logger.error(f"[Bookshop] Paystack timeout for order {unique_order_id}")
                 flash("Request timed out. Please try again.", "warning")
                 return render_template("errors/timeout.html"), 504
             except requests.exceptions.ConnectionError:
+                current_app.logger.error(f"[Bookshop] Paystack connection error for order {unique_order_id}")
                 flash("Could not connect to Paystack. Check your internet and try again.", "danger")
                 return render_template("errors/connection_error.html"), 502
             except requests.exceptions.RequestException as e:
+                current_app.logger.exception(f"[Bookshop] Paystack error for order {unique_order_id}: {e}")
                 flash("Something went wrong while initializing payment.", "danger")
                 return render_template("errors/general_error.html", error=str(e)), 500
 
         elif payment_method == 'cod':
+            current_app.logger.info(f"[Bookshop] Processing COD order {unique_order_id}")
+            
             order = Order(
                 user_id=current_user.id,
                 order_id=unique_order_id,
@@ -219,50 +233,94 @@ def checkout():
                 })
 
             db.session.commit()
+            current_app.logger.info(f"[Bookshop] Order {unique_order_id} saved locally")
 
-            send_order_email(
-                to=email,
-                full_name=full_name,
-                order_id=unique_order_id,
-                items=order_items_data,
-                total=grand_total,
-                payment_method="Cash on Delivery",
-                address=address,
-                phone=phone,
-                order_date=datetime.now().strftime('%d %B %Y %I:%M:%S%p').lower(),
-                subtotal=subtotal,
-                discount=discount
-            )
-
+            # Send confirmation email
             try:
-                api_data = {
-                    'order_id': unique_order_id,
-                    'user_id': current_user.id,
-                    'full_name': full_name,
-                    'email': email,
-                    'address': address,
-                    'total_amount': grand_total,
-                    'payment_method': 'cod',
-                    'items': order_items_data
-                }
-                api_headers = {
-                    'Authorization': f'Bearer {os.getenv("API_TOKEN")}',
-                    'Content-Type': 'application/json'
-                }
-                api_res = requests.post(
-                    f'{os.getenv('API_BASE_URL')}/orders',
-                    json=api_data,
-                    headers=api_headers,
-                    timeout=10
+                send_order_email(
+                    to=email,
+                    full_name=full_name,
+                    order_id=unique_order_id,
+                    items=order_items_data,
+                    total=grand_total,
+                    payment_method="Cash on Delivery",
+                    address=address,
+                    phone=phone,
+                    order_date=datetime.now().strftime('%d %B %Y %I:%M:%S%p').lower(),
+                    subtotal=subtotal,
+                    discount=discount
                 )
-                if api_res.status_code == 201:
-                    flash("Order successful.", "success")
-                else:
-                    flash(f"Order placed, but failed to sync to admin dashboard. {api_res.status_code}: {api_res.text}", "warning")
+                current_app.logger.info(f"[Bookshop] Confirmation email sent for order {unique_order_id}")
             except Exception as e:
-                flash(f"Order placed, but error syncing to admin dashboard: {e}", "warning")
+                current_app.logger.error(f"[Bookshop] Failed to send email for order {unique_order_id}: {e}")
 
-            flash(f"Order placed successfully. Your Order ID is {unique_order_id}. You will pay on delivery.", "success")
+            # Sync to Learning Platform Admin Dashboard
+            try:
+                api_base_url = os.getenv('API_BASE_URL')
+                api_token = os.getenv('API_TOKEN')
+                
+                if not api_base_url or not api_token:
+                    current_app.logger.error("[Bookshop] Missing API_BASE_URL or API_TOKEN in environment")
+                    flash("Order placed locally but could not sync to admin dashboard (missing config).", "warning")
+                else:
+                    api_data = {
+                        'order_id': unique_order_id,
+                        'user_id': current_user.id,
+                        'full_name': full_name,
+                        'email': email,
+                        'address': address,
+                        'phone': phone,
+                        'total_amount': grand_total,
+                        'payment_method': 'cod',
+                        'items': order_items_data
+                    }
+                    api_headers = {
+                        'Authorization': f'Bearer {api_token}',
+                        'Content-Type': 'application/json'
+                    }
+                    
+                    current_app.logger.info(
+                        f"[Bookshop] Syncing order {unique_order_id} to admin dashboard at {api_base_url}"
+                    )
+                    
+                    api_res = requests.post(
+                        f'{api_base_url}/orders',
+                        json=api_data,
+                        headers=api_headers,
+                        timeout=10
+                    )
+                    
+                    if api_res.status_code == 201:
+                        current_app.logger.info(
+                            f"[Bookshop] ✓ Order {unique_order_id} synced successfully to admin dashboard"
+                        )
+                    else:
+                        current_app.logger.error(
+                            f"[Bookshop] Failed to sync order {unique_order_id}: "
+                            f"Status {api_res.status_code}, Response: {api_res.text}"
+                        )
+                        flash(
+                            f"Order placed, but failed to sync to admin dashboard. "
+                            f"Status: {api_res.status_code}", 
+                            "warning"
+                        )
+                        
+            except requests.exceptions.Timeout:
+                current_app.logger.error(
+                    f"[Bookshop] Timeout syncing order {unique_order_id} to admin dashboard"
+                )
+                flash("Order placed, but sync to admin dashboard timed out.", "warning")
+            except Exception as e:
+                current_app.logger.exception(
+                    f"[Bookshop] Error syncing order {unique_order_id} to admin dashboard: {e}"
+                )
+                flash(f"Order placed, but error syncing to admin dashboard.", "warning")
+
+            flash(
+                f"Order placed successfully. Your Order ID is {unique_order_id}. "
+                f"You will pay on delivery.", 
+                "success"
+            )
             session.pop('cart', None)
             return redirect(url_for('main.order_success', order_id=unique_order_id))
 
@@ -334,7 +392,7 @@ def payment_callback():
         subtotal = sum(i['original_price'] * i['quantity'] for i in order_items_data)
         discount = sum((i['original_price'] - i['price']) * i['quantity'] for i in order_items_data)
 
-        # ✅ Sync order to Learning Platform
+        # Sync order to Learning Platform
         try:
             api_data = {
                 'order_id': unique_order_id,
