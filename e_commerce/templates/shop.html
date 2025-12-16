@@ -1,0 +1,136 @@
+{% extends "index.html" %}
+{% block title %}Shop | RealmindX Bookshop{% endblock %}
+
+{% block content %}
+<div class="container-fluid my-4">
+
+  {% include 'fliers.html' %}
+
+  <h2 class="text-center mb-3" style="color: #0C2E60;">
+    Latest Books
+  </h2>
+
+  {% if products.items %}
+    <div class="row g-2">
+      {% for product in products.items %}
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="card h-100 shadow-sm border-0">
+
+          <!-- Image -->
+          <div class="position-relative" style="height: 180px;">
+            {% if product.image_url %}
+              <img src="{{ product.image_url }}"
+                   class="card-img-top"
+                   alt="{{ product.name }}"
+                   style="height: 100%; object-fit: cover;">
+            {% elif product.image_filename %}
+              <img src="{{ url_for('static', filename='uploads/' ~ product.image_filename) }}"
+                   class="card-img-top"
+                   alt="{{ product.name }}"
+                   style="height: 100%; object-fit: cover;">
+            {% endif %}
+
+            {% if not product.in_stock %}
+              <div class="position-absolute top-0 start-0 w-100 h-100
+                          d-flex justify-content-center align-items-center"
+                   style="background: rgba(0,0,0,.4);">
+                <span class="text-white fw-bold">Out of Stock</span>
+              </div>
+            {% endif %}
+          </div>
+
+          <!-- Body -->
+          <div class="card-body p-2">
+            <h6 class="card-title mb-1" style="color:#0C2E60;">
+              {{ product.name }}
+            </h6>
+
+            <p class="small mb-1 text-muted">
+              {{ product.description[:60] }}{% if product.description|length > 60 %}...{% endif %}
+            </p>
+
+            <!-- Price -->
+            {% if product.discount_percentage and product.discount_percentage > 0 %}
+              <p class="mb-1">
+                <del class="text-muted">
+                  GH₵{{ '%.2f'|format(product.price) }}
+                </del>
+                <span class="text-danger fw-bold ms-1">
+                  GH₵{{ '%.2f'|format(product.discounted_price) }}
+                </span>
+                <span class="badge bg-success small ms-1">
+                  {{ product.discount_percentage|round(0) }}% OFF
+                </span>
+              </p>
+            {% else %}
+              <p class="fw-bold text-primary small mb-1">
+                GH₵{{ '%.2f'|format(product.price) }}
+              </p>
+            {% endif %}
+
+            <!-- Rating -->
+            {% if product.ratings %}
+              {% set avg = (product.ratings | map(attribute='rating') | list | sum) / product.ratings|length %}
+              {% for i in range(1,6) %}
+                <span class="{{ 'text-warning' if i <= avg else 'text-secondary' }}">★</span>
+              {% endfor %}
+              <small class="text-muted">({{ '%.1f' % avg }}/5)</small>
+            {% else %}
+              <small class="text-muted fst-italic d-block">No ratings yet</small>
+            {% endif %}
+
+            <!-- Stock -->
+            <span class="badge {{ 'bg-success' if product.in_stock else 'bg-danger' }} my-1">
+              {{ 'In Stock' if product.in_stock else 'Out of Stock' }}
+            </span>
+
+            <!-- Cart -->
+            {% if product.in_stock %}
+              <a href="{{ url_for('cart.add_quantity', product_id=product.id) }}"
+                 class="btn btn-outline-dark btn-sm w-100">
+                Add to cart
+              </a>
+            {% else %}
+              <button class="btn btn-outline-dark btn-sm w-100" disabled>
+                Add to cart
+              </button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    <nav class="mt-4">
+      <ul class="pagination justify-content-center">
+        {% if products.has_prev %}
+          <li class="page-item">
+            <a class="page-link" href="{{ url_for('main.shop', page=products.prev_num) }}">Previous</a>
+          </li>
+        {% endif %}
+
+        {% for p in products.iter_pages() %}
+          {% if p %}
+            <li class="page-item {% if p == products.page %}active{% endif %}">
+              <a class="page-link" href="{{ url_for('main.shop', page=p) }}">{{ p }}</a>
+            </li>
+          {% endif %}
+        {% endfor %}
+
+        {% if products.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="{{ url_for('main.shop', page=products.next_num) }}">Next</a>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
+
+  {% else %}
+    <div class="alert alert-warning text-center">
+      No products available at the moment.
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}
