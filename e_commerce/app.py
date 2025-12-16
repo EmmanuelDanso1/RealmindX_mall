@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import os
 from extensions import db, migrate, login_manager, mail
 import logging
-
+from logging.handlers import RotatingFileHandler
 # Load environment variables
 load_dotenv()
 
@@ -24,16 +24,48 @@ def create_app():
     # Load config
     app.config.from_object('config.Config')
     
-    # logging
+    # ---------------------------
+    # BASIC LOGGING (console)
+    # ---------------------------
+    logging.basicConfig(
+        level=logging.INFO,
+        format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s'
+    )
+
+    # ---------------------------
+    # FILE LOGGING (production)
+    # ---------------------------
+    if not app.debug and not app.testing:
+        log_dir = os.path.join(app.root_path, 'logs')
+        os.makedirs(log_dir, exist_ok=True)
+
+        log_file = os.path.join(log_dir, 'bookshop.log')
+
+        file_handler = RotatingFileHandler(
+            log_file,
+            maxBytes=10240,   # 10KB
+            backupCount=10
+        )
+        file_handler.setLevel(logging.INFO)
+        file_handler.setFormatter(logging.Formatter(
+            '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'
+        ))
+
+        # Prevent duplicate handlers
+        if not any(isinstance(h, RotatingFileHandler) for h in app.logger.handlers):
+            app.logger.addHandler(file_handler)
+
+        app.logger.setLevel(logging.INFO)
+        app.logger.info(" Bookshop application started")
+
+    # ---------------------------
+    # LOG STATIC IMAGE REQUESTS
+    # ---------------------------
     @app.before_request
     def log_image_requests():
         if request.path.startswith('/static/uploads/'):
             current_app.logger.info(f"Image requested: {request.path}")
 
-    logging.basicConfig(
-    level=logging.INFO,
-    format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s'
-    )
 
     # Ensure upload folder exists
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
