@@ -31,11 +31,13 @@ def contact():
 @main_bp.route('/shop')
 def shop():
     page = request.args.get('page', 1, type=int)
-    products = Product.query.filter_by(is_active=True)\
-        .order_by(Product.created_at.desc())\
+
+    products = Product.query \
+        .order_by(Product.date_created.desc()) \
         .paginate(page=page, per_page=12)
 
     return render_template('shop.html', products=products)
+
 
 
 @main_bp.route('/product/<int:product_id>')
