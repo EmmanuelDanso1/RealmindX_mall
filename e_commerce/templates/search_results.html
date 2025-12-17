@@ -71,7 +71,24 @@
             <div class="card-body">
               <h5 class="card-title">{{ product.name }}</h5>
               <p class="card-text">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
-              <p class="text-primary fw-bold">₵{{ '%.2f'|format(product.price) }}</p>
+              <!-- Price -->
+              {% if product.discount_percentage and product.discount_percentage > 0 %}
+                <p class="mb-1">
+                  <del class="text-muted">
+                    GH₵{{ '%.2f'|format(product.price) }}
+                  </del>
+                  <span class="text-danger fw-bold ms-1">
+                    GH₵{{ '%.2f'|format(product.discounted_price) }}
+                  </span>
+                  <span class="badge bg-success small ms-1">
+                    {{ product.discount_percentage|round(0) }}% OFF
+                  </span>
+                </p>
+              {% else %}
+                <p class="fw-bold text-primary small mb-1">
+                  GH₵{{ '%.2f'|format(product.price) }}
+                </p>
+              {% endif %}
 
               {% if product.in_stock %}
                 <span class="badge bg-success mb-2">In Stock</span>
