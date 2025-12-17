@@ -35,7 +35,6 @@
           style="height: 55px; width: auto;">
     </a>
 
-
     <!-- Cart icon small/medium -->
     <a href="{{ url_for('cart.view_cart') }}" class="text-dark position-relative ms-2 d-lg-none">
       <i class="fas fa-shopping-cart"></i>
@@ -46,8 +45,7 @@
       {% endif %}
     </a>
 
-    <!-- Mobile search (guests only) -->
-    {% if not current_user.is_authenticated %}
+    <!-- Mobile search -->
     <form method="GET" action="{{ url_for('main.search') }}" class="d-flex d-lg-none w-100 mt-3">
       <input class="form-control me-2 rounded-pill" type="search" name="q"  placeholder="Search for products, author..." autocomplete="off">
       <select name="category" class="form-select me-2 rounded-pill">
@@ -58,12 +56,10 @@
       </select>
       <button class="btn rounded-pill" style="background-color: #143670; color:#fff"><i class="fas fa-search"></i></button>
     </form>
-    {% endif %}
 
     <!-- Large screen search + links -->
     <div class="collapse navbar-collapse d-none d-lg-flex justify-content-between mt-2">
       <div class="d-flex align-items-center w-100">
-        {% if not current_user.is_authenticated %}
         <form method="GET" action="{{ url_for('main.search') }}" class="d-flex w-50 me-3">
           <input class="form-control me-2 rounded-pill" type="search" name="q" placeholder="Search for products, author, level..." autocomplete="off">
           <select name="category" class="form-select me-2 rounded-pill">
@@ -80,28 +76,28 @@
           </select>
           <button class="btn text-white rounded-pill" style="background-color: #143670;"><i class="fas fa-search"></i></button>
         </form>
-        {% endif %}
 
         <!-- Right Nav Links -->
         <div class="d-flex align-items-center ms-auto">
+          <a href="{{ url_for('main.contact') }}" class="btn btn-outline-dark me-3 rounded-pill"><i></i>Contact</a>
+          <a href="{{ url_for('main.track_order') }}" class="btn btn-outline-dark me-3 rounded-pill"><i></i>Track your order</a>
+          <a href="{{ url_for('main.info') }}" class="btn btn-outline-dark me-3 rounded-pill"><i class="fas fa-info-circle me-1"></i> Info</a>
+          <a href="{{ url_for('cart.view_cart') }}" class="text-dark position-relative me-3">
+            <i class="fas fa-shopping-cart"></i>
+            {% if cart_item_count %}
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+              {{ cart_item_count }}
+            </span>
+            {% endif %}
+          </a>
+          
           {% if not current_user.is_authenticated %}
-            <a href="{{ url_for('main.contact') }}" class="btn btn-outline-dark me-3 rounded-pill"><i></i>Contact</a>
-            <a href="{{ url_for('main.track_order') }}" class="btn btn-outline-dark me-3 rounded-pill"><i></i>Track your order</a>
-            <a href="{{ url_for('main.info') }}" class="btn btn-outline-dark me-3 rounded-pill"><i class="fas fa-info-circle me-1"></i> Info</a>
-            <a href="{{ url_for('cart.view_cart') }}" class="text-dark position-relative me-3">
-              <i class="fas fa-shopping-cart"></i>
-              {% if cart_item_count %}
-              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                {{ cart_item_count }}
-              </span>
-              {% endif %}
-            </a>
             <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-sm me-2 rounded-pill">Login</a>
             <a href="{{ url_for('auth.user_signup') }}" class="btn  btn-sm rounded-pill" style="background-color: #143670; color: #fff">Signup</a>
           {% else %}
             <span class="me-3">Welcome, {{ current_user.username }}</span>
             <a class="nav-link me-3" href="{{ url_for('main.purchased_products') }}"><i class="fas fa-box-open me-1"></i> My Orders</a>
-            <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger btn-sm">Logout</a>
+            <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger btn-sm rounded-pill">Logout</a>
           {% endif %}
         </div>
       </div>
@@ -117,19 +113,18 @@
   </div>
   <div class="offcanvas-body">
     <ul class="list-group list-group-flush">
+      <li class="list-group-item"><a href="{{ url_for('main.info') }}" style="color: #143670;"><i class="fas fa-info-circle me-2"></i>Info</a></li>
+      <li class="list-group-item"><a href="{{ url_for('cart.view_cart') }}" style="color: #143670;"><i class="fas fa-shopping-cart me-2"></i>Cart</a></li>
+      <li class="list-group-item"><a href="{{ url_for('main.contact') }}" style="color: #143670;"><i class="fas fa-envelope me-2"></i>Contact</a></li>
+      <li class="list-group-item"><a href="{{ url_for('main.track_order') }}" style="color: #143670;"><i class="fas fa-shipping-fast me-2"></i>Track Order</a></li>
+      
       {% if not current_user.is_authenticated %}
-        <li class="list-group-item "><a href="{{ url_for('main.info') }}" style="color: #143670;"><i class="fas fa-info-circle me-2"></i>Info</a></li>
-        <li class="list-group-item "><a href="{{ url_for('cart.view_cart') }}" style="color: #143670;"><i class="fas fa-shopping-cart me-2"></i>Cart</a></li>
-        <li class="list-group-item "><a href="{{ url_for('main.contact') }}" style="color: #143670;"><i class="fas fa-envelope me-2"></i>Contact</a></li>
-        <li class="list-group-item "><a href="{{ url_for('main.track_order') }}" style="color: #143670;"><i class="fas fa-shipping-fast me-2"></i>Track Order</a></li>
-        <li class="list-group-item "><a href="{{ url_for('auth.login') }}" style="color: #143670;"><i class="fas fa-sign-in-alt me-2" ></i>Login</a></li>
-        <li class="list-group-item "><a href="{{ url_for('auth.user_signup') }}" style="color: #143670;"><i class="fas fa-user-plus me-2"></i>Signup</a></li>
-
-
+        <li class="list-group-item"><a href="{{ url_for('auth.login') }}" style="color: #143670;"><i class="fas fa-sign-in-alt me-2"></i>Login</a></li>
+        <li class="list-group-item"><a href="{{ url_for('auth.user_signup') }}" style="color: #143670;"><i class="fas fa-user-plus me-2"></i>Signup</a></li>
       {% else %}
         <li class="list-group-item disabled"><i class="fas fa-user me-2"></i>Welcome, {{ current_user.username }}</li>
-        <li class="list-group-item "><a href="{{ url_for('main.purchased_products') }}"><i class="fas fa-box-open me-2"></i>My Orders</a></li>
-        <li class="list-group-item "><a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+        <li class="list-group-item"><a href="{{ url_for('main.purchased_products') }}" style="color: #143670;"><i class="fas fa-box-open me-2"></i>My Orders</a></li>
+        <li class="list-group-item"><a href="{{ url_for('auth.logout') }}" style="color: #143670;"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
       {% endif %}
     </ul>
   </div>
@@ -140,8 +135,7 @@
   {% block content %}{% endblock %}
 </main>
 
-{% if not current_user.is_authenticated %}
-<!-- Newsletter -->
+<!-- Newsletter (Always visible) -->
 <section class="newsletter-section py-4" style="background-color: #ffcc01; color: #143670;">
   <div class="container-fluid d-flex flex-column flex-md-row justify-content-between align-items-center">
     <p class="newsletter-text mb-3 mb-md-0">
@@ -156,7 +150,7 @@
   </div>
 </section>
 
-<!-- FOOTER -->
+<!-- FOOTER (Always visible) -->
 <footer class="footer-section text-light pt-5 pb-4" style="background-color: #143670;">
   <div class="container-fluid">
     <div class="row gy-5" style="row-gap: 1rem !important;">
@@ -175,7 +169,7 @@
         <ul class="list-unstyled">
           {% for cat in categories %}
           <li>
-            <a href="{{ url_for('main.search', category=cat.id) }}">
+            <a href="{{ url_for('main.search', category=cat.id) }}" class="text-white" style="text-decoration: none;">
               {% if cat.name|length in [3, 5] %}
                 {{ cat.name.upper() }}
               {% else %}
@@ -191,17 +185,18 @@
       <div class="col-lg-3 col-md-6 text-md-start" style="line-height: 1.2;">
         <h5 class="footer-title" style="color: #ffcc01; margin-bottom: 0.4rem;">Contact</h5>
         <p style="margin-bottom: 0.2rem;"><i class="fa fa-map-marker-alt me-2"></i> Dome Pillar 2</p>
-        <p style="margin-bottom: 0.2rem;"><i class="fa fa-envelope me-2"></i> <a href="mailto:realmindxgh@gmail.com">realmindxgh@gmail.com</a></p>
+        <p style="margin-bottom: 0.2rem;"><i class="fa fa-envelope me-2"></i> <a href="mailto:realmindxgh@gmail.com" class="text-white">realmindxgh@gmail.com</a></p>
         <p style="margin-bottom: 0.2rem;"><i class="fa fa-phone me-2"></i> +233 55 803 9190</p>
         <p style="margin-bottom: 0.2rem;"><i class="fa fa-phone me-2"></i> +233 55 452 9493</p>
         <p style="margin-bottom: 0.2rem;"><i class="fa fa-phone me-2"></i> +233 55 132 4729</p>
       </div>
+      
       <!-- Customer Care -->
       <div class="col-lg-3 col-md-6 text-md-start">
         <h5 class="footer-title" style="color: #ffcc01;">Customer Care</h5>
         <ul class="list-unstyled">
           <li><a href="{{ url_for('auth.login') }}" class="text-white" style="text-decoration: none;">My Account</a></li>
-          <li><a href="{{ url_for('auth.login') }}"class="text-white" style="text-decoration: none;">My Orders</a></li>
+          <li><a href="{{ url_for('main.purchased_products') if current_user.is_authenticated else url_for('auth.login') }}" class="text-white" style="text-decoration: none;">My Orders</a></li>
           <li><a href="{{ url_for('cart.checkout') }}" class="text-white" style="text-decoration: none;">Checkout</a></li>
           <li><a href="#" class="text-white" style="text-decoration: none;">Terms & Conditions</a></li>
         </ul>
@@ -211,20 +206,20 @@
       <div class="col-lg-3 col-md-6 text-md-start">
         <h5 class="footer-title" style="color: #ffcc01;">Follow Us</h5>
         <div class="social-icons mb-3">
-          <a href="https://x.com/RealMindXgh" target="_blank"  style="text-decoration:none;"> <i class="fa-brands fa-x-twitter" style="color:#000000; font-size:18px; "></i> </a> 
-          <a href="https://web.facebook.com/profile.php?id=61566941171883" target="_blank"  style="text-decoration:none;"> <i class="fa-brands fa-facebook" style="color:#1877F2; font-size:18px;"></i> </a>
+          <a href="https://x.com/RealMindXgh" target="_blank" style="text-decoration:none;"> <i class="fa-brands fa-x-twitter" style="color:#000000; font-size:18px;"></i> </a> 
+          <a href="https://web.facebook.com/profile.php?id=61566941171883" target="_blank" style="text-decoration:none;"> <i class="fa-brands fa-facebook" style="color:#1877F2; font-size:18px;"></i> </a>
           <a href="https://www.instagram.com/realmindxgh/" target="_blank" style="text-decoration:none;"> <i class="fa-brands fa-instagram" style="color:#E1306C; font-size:18px;"></i> </a>
           <a href="https://www.youtube.com/@realmindxgh" target="_blank" style="text-decoration:none;"> <i class="fa-brands fa-youtube" style="color:#FF0000; font-size:18px;"></i> </a>
           <a href="https://wa.link/d6x888" target="_blank" style="text-decoration:none;"> <i class="fa-brands fa-whatsapp" style="color:#25D366; font-size:18px;"></i> </a>
         </div>
       </div>
+      
       <div class="text-center mt-3"> <small id="copyright"></small> </div>
     </div>
   </div>
 </footer>
 
-{% endif %}
-
+<!-- WhatsApp Float -->
 <a href="https://wa.link/q5rjtp" class="whatsapp-float" target="_blank" style="position: fixed;
   bottom: 20px;
   right: 20px;
