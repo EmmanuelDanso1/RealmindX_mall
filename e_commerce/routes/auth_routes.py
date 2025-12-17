@@ -41,6 +41,8 @@ def user_signup():
         login_user(new_user)
         flash('Account created successfully!', 'success')
 
+        # Redirect to shop
+        return redirect(url_for('main.shop'))
 
     return render_template('auth/signup.html', form=form)
 
@@ -67,6 +69,8 @@ def login():
             if next_page and is_safe_url(next_page):
                 return redirect(next_page)
 
+            #  Default redirect to shop
+            return redirect(url_for('main.shop'))
 
         flash('Invalid credentials', 'danger')
 
