@@ -3,7 +3,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, session,
 from flask_login import login_required, current_user
 import requests
 from e_commerce.utils.helpers import get_random_unique_order_id
-from e_commerce.models import Product, Order, OrderItem
+from e_commerce.models import Product, Order, OrderItem, Cart
 from extensions import db, mail
 from flask_mail import Message
 from datetime import datetime
@@ -14,62 +14,161 @@ logger = logging.getLogger(__name__)
 
 cart_bp = Blueprint('cart', __name__)
 
+def sync_session_to_db():
+    """Sync session cart to database when user logs in"""
+    if current_user.is_authenticated:
+        session_cart = session.get('cart', {})
+        
+        for product_id_str, item in session_cart.items():
+            product_id = int(product_id_str)
+            
+            # Check if item already in DB cart
+            cart_item = Cart.query.filter_by(
+                user_id=current_user.id,
+                product_id=product_id
+            ).first()
+            
+            if cart_item:
+                # Update quantity
+                cart_item.quantity += item['quantity']
+            else:
+                # Create new cart item
+                cart_item = Cart(
+                    user_id=current_user.id,
+                    product_id=product_id,
+                    quantity=item['quantity']
+                )
+                db.session.add(cart_item)
+        
+        db.session.commit()
+        # Clear session cart after syncing
+        session.pop('cart', None)
+
 # Utility: initialize cart if not in session
 def get_cart():
-    if 'cart' not in session:
-        session['cart'] = {}
-    return session['cart']
+    """Get cart items - from DB if authenticated, session otherwise"""
+    if current_user.is_authenticated:
+        # Return cart from database
+        cart_items = Cart.query.filter_by(user_id=current_user.id).all()
+        cart_dict = {}
+        for item in cart_items:
+            cart_dict[str(item.product_id)] = {
+                'name': item.product.name,
+                'price': float(item.product.discounted_price if item.product.discount_percentage > 0 else item.product.price),
+                'image': item.product.image_filename,
+                'quantity': item.quantity
+            }
+        return cart_dict
+    else:
+        # Return cart from session
+        if 'cart' not in session:
+            session['cart'] = {}
+        return session['cart']
 
 # Add to cart
 @cart_bp.route('/cart/add/<int:product_id>', methods=['POST'])
 def add_to_cart(product_id):
     product = Product.query.get_or_404(product_id)
-    cart = session.get('cart', {})
-
-    product_id_str = str(product.id)
-
-    if product_id_str in cart:
-        cart[product_id_str]['quantity'] += 1
+    
+    if current_user.is_authenticated:
+        # Add to database cart
+        cart_item = Cart.query.filter_by(
+            user_id=current_user.id,
+            product_id=product_id
+        ).first()
+        
+        if cart_item:
+            cart_item.quantity += 1
+        else:
+            cart_item = Cart(
+                user_id=current_user.id,
+                product_id=product_id,
+                quantity=1
+            )
+            db.session.add(cart_item)
+        
+        db.session.commit()
+        current_app.logger.info(f"[Cart] User {current_user.id} added product {product_id} to cart")
     else:
-        cart[product_id_str] = {
-            'name': product.name,
-            'price': float(product.discounted_price if product.discount_percentage > 0 else product.price),
-            'image': product.image_filename,
-            'quantity': 1
-        }
-
-    session['cart'] = cart  # <- This ensures session gets updated
-    session.modified = True
+        # Add to session cart
+        cart = session.get('cart', {})
+        product_id_str = str(product.id)
+        
+        if product_id_str in cart:
+            cart[product_id_str]['quantity'] += 1
+        else:
+            cart[product_id_str] = {
+                'name': product.name,
+                'price': float(product.discounted_price if product.discount_percentage > 0 else product.price),
+                'image': product.image_filename,
+                'quantity': 1
+            }
+        
+        session['cart'] = cart
+        session.modified = True
 
     flash(f"Added {product.name} to cart.", "success")
     return redirect(request.referrer or url_for('main.home'))
 
 
-# View Cart
 @cart_bp.route('/cart')
 def view_cart():
-    cart = get_cart()
     items = []
     total = 0
-
-    for product_id, item in cart.items():
-        product = Product.query.get(int(product_id))
-        if product:
-            quantity = item['quantity']
-            total += product.price * quantity
-            items.append({'product': product, 'quantity': quantity})
+    
+    if current_user.is_authenticated:
+        # Get from database
+        cart_items = Cart.query.filter_by(user_id=current_user.id).all()
+        
+        for cart_item in cart_items:
+            product = cart_item.product
+            quantity = cart_item.quantity
+            price = product.discounted_price if product.discount_percentage > 0 else product.price
+            total += price * quantity
+            items.append({
+                'product': product,
+                'quantity': quantity,
+                'subtotal': price * quantity
+            })
+    else:
+        # Get from session
+        cart = get_cart()
+        for product_id, item in cart.items():
+            product = Product.query.get(int(product_id))
+            if product:
+                quantity = item['quantity']
+                price = product.discounted_price if product.discount_percentage > 0 else product.price
+                total += price * quantity
+                items.append({
+                    'product': product,
+                    'quantity': quantity,
+                    'subtotal': price * quantity
+                })
 
     return render_template('cart.html', cart=items, total=total)
 
 # Remove item from cart
 @cart_bp.route('/cart/remove/<int:product_id>', methods=['POST'])
 def remove_from_cart(product_id):
-    cart = get_cart()
-    cart.pop(str(product_id), None)
-    session.modified = True
+    if current_user.is_authenticated:
+        # Remove from database
+        cart_item = Cart.query.filter_by(
+            user_id=current_user.id,
+            product_id=product_id
+        ).first()
+        
+        if cart_item:
+            db.session.delete(cart_item)
+            db.session.commit()
+            current_app.logger.info(f"[Cart] User {current_user.id} removed product {product_id}")
+    else:
+        # Remove from session
+        cart = session.get('cart', {})
+        cart.pop(str(product_id), None)
+        session.modified = True
+    
     flash("Item removed from cart.", "info")
     return redirect(url_for('cart.view_cart'))
-
 
 # Getting random ids for order
 def send_order_email(to, full_name, order_id, items, total, payment_method, address, phone, order_date, subtotal, discount):

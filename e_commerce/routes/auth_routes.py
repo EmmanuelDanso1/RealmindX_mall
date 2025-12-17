@@ -54,6 +54,7 @@ def is_safe_url(target):
     return test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc
 
 
+
 @auth_bp.route('/user/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -63,13 +64,16 @@ def login():
 
         if user and check_password_hash(user.password, form.password.data):
             login_user(user)
+            
+            # Sync session cart to database (ADD THIS)
+            from e_commerce.routes.cart_routes import sync_session_to_db
+            sync_session_to_db()
 
             next_page = request.args.get('next') or session.pop('next', None)
 
             if next_page and is_safe_url(next_page):
                 return redirect(next_page)
 
-            #  Default redirect to shop
             return redirect(url_for('main.shop'))
 
         flash('Invalid credentials', 'danger')

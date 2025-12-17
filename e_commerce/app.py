@@ -73,7 +73,7 @@ def create_app():
     
     # Register blueprint
     app.register_blueprint(oauth_bp, url_prefix='/oauth')
-    
+
     # Ensure upload folder exists
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     # Initialize extensions
@@ -110,6 +110,24 @@ def create_app():
     app.register_blueprint(api_bp)
     app.register_blueprint(cart_bp)
     app.register_blueprint(auth_bp)
+
+    @app.context_processor
+    def inject_cart_count():
+        """Inject cart item count into all templates"""
+        count = 0
+        
+        try:
+            if current_user.is_authenticated:
+                from e_commerce.models import Cart
+                count = db.session.query(db.func.sum(Cart.quantity)).filter_by(user_id=current_user.id).scalar() or 0
+            else:
+                cart = session.get('cart', {})
+                count = sum(item.get('quantity', 0) for item in cart.values())
+        except Exception as e:
+            current_app.logger.error(f"Error calculating cart count: {e}")
+            count = 0
+        
+        return {'cart_item_count': count}
 
     # Cart Totals
     @app.context_processor
