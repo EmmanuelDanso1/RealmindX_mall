@@ -4,6 +4,8 @@ import os
 from extensions import db, migrate, login_manager, mail
 import logging
 from logging.handlers import RotatingFileHandler
+from e_commerce.routes.oauth_routes import oauth_bp, init_oauth
+
 # Load environment variables
 load_dotenv()
 
@@ -66,7 +68,12 @@ def create_app():
         if request.path.startswith('/static/uploads/'):
             current_app.logger.info(f"Image requested: {request.path}")
 
-
+    # Initialize OAuth
+    init_oauth(app)
+    
+    # Register blueprint
+    app.register_blueprint(oauth_bp, url_prefix='/oauth')
+    
     # Ensure upload folder exists
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     # Initialize extensions

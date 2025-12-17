@@ -9,7 +9,9 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
-
+    # google auth
+    google_id = db.Column(db.String(255), unique=True, nullable=True)
+    is_oauth_user = db.Column(db.Boolean, default=False)
     # Optional: profile fields
     date_joined = db.Column(db.DateTime, server_default=db.func.now())
     
