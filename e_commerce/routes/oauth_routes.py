@@ -20,7 +20,7 @@ def init_oauth(app):
         client_kwargs={'scope': 'openid email profile'}
     )
     
-    current_app.logger.info("[Bookshop OAuth] Google OAuth initialized")
+    app.logger.info("[Bookshop OAuth] Google OAuth initialized")
 
 
 @oauth_bp.route('/login/google')
