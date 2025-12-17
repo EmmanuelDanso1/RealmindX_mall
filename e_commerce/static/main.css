@@ -67,9 +67,18 @@ p, a, span, li, button {
 }
 
 .social-btn .icon {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    flex-shrink: 0;
 }
+
+.social-btn img {
+    width: 18px !important;
+    height: 18px !important;
+}
+
+
 
 /* Force Google typical look */
 .google-btn {
