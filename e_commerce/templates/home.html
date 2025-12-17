@@ -129,12 +129,6 @@
       <div class="alert alert-warning text-center">No products available at the moment.</div>
     {% endif %}
 
-  {% else %}
-    <div class="alert alert-info text-center">
-      Welcome, {{ current_user.username }}. You can view and rate your 
-      <a href="{{ url_for('main.purchased_products') }}">purchased products here</a>.
-    </div>
   {% endif %}
-
 </div>
 {% endblock %}
