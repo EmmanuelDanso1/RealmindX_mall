@@ -5,7 +5,7 @@ from extensions import db, migrate, login_manager, mail
 import logging
 from logging.handlers import RotatingFileHandler
 from e_commerce.routes.oauth_routes import oauth_bp, init_oauth
-
+from flask_login import current_user
 # Load environment variables
 load_dotenv()
 
@@ -124,7 +124,7 @@ def create_app():
                 cart = session.get('cart', {})
                 count = sum(item.get('quantity', 0) for item in cart.values())
         except Exception as e:
-            current_app.logger.error(f"Error calculating cart count: {e}")
+            app.logger.error(f"Error calculating cart count: {e}")
             count = 0
         
         return {'cart_item_count': count}
