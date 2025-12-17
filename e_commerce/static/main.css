@@ -84,6 +84,18 @@ p, a, span, li, button {
 .google-btn {
     border-color: #dadce0;
 }
+
+.btn-google {
+    background: #fff;
+    border: 1px solid #dadce0;
+    color: #3c4043;
+    font-weight: 500;
+}
+
+.btn-google:hover {
+    background: #f8f9fa;
+}
+
 /* Footer Section */
 .footer-section {
   background-color: #0b2c67;  /* Dark navy blue */
