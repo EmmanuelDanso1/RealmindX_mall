@@ -45,7 +45,35 @@ p, a, span, li, button {
   background-color: #143760;
   color: #fff;
 }
+/* icons for google */
+.social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: #ffffff;
+    border: 1px solid #d6d6d6;
+    border-radius: 6px;
+    padding: 10px 0;
+    font-size: 15px;
+    font-weight: 500;
+    color: #222;
+    text-decoration: none;
+}
 
+.social-btn:hover {
+    background: #f9f9f9;
+}
+
+.social-btn .icon {
+    width: 20px;
+    height: 20px;
+}
+
+/* Force Google typical look */
+.google-btn {
+    border-color: #dadce0;
+}
 /* Footer Section */
 .footer-section {
   background-color: #0b2c67;  /* Dark navy blue */
