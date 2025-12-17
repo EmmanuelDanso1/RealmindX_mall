@@ -199,21 +199,24 @@ def send_order_email(to, full_name, order_id, items, total, payment_method, addr
 @cart_bp.route('/cart/checkout', methods=['GET', 'POST'])
 @login_required
 def checkout():
-    cart = session.get('cart', {})
-    if not cart:
-        flash("Your cart is empty.", "warning")
-        return redirect(url_for('main.home'))
-
     items = []
     grand_total = 0
     discount = 0
     subtotal = 0
-
-    for product_id, item in cart.items():
-        product = Product.query.get(int(product_id))
-        if product:
+    
+    # Get cart items based on authentication status
+    if current_user.is_authenticated:
+        # Get from database
+        cart_items = Cart.query.filter_by(user_id=current_user.id).all()
+        
+        if not cart_items:
+            flash("Your cart is empty.", "warning")
+            return redirect(url_for('main.home'))
+        
+        for cart_item in cart_items:
+            product = cart_item.product
             price = product.price
-            quantity = item['quantity']
+            quantity = cart_item.quantity
             discounted_price = product.discounted_price if product.discount_percentage > 0 else product.price
             total = discounted_price * quantity
             grand_total += total
@@ -228,6 +231,32 @@ def checkout():
                 'quantity': quantity,
                 'total': total
             })
+    else:
+        # Get from session (fallback for guests)
+        cart = session.get('cart', {})
+        if not cart:
+            flash("Your cart is empty.", "warning")
+            return redirect(url_for('main.home'))
+
+        for product_id, item in cart.items():
+            product = Product.query.get(int(product_id))
+            if product:
+                price = product.price
+                quantity = item['quantity']
+                discounted_price = product.discounted_price if product.discount_percentage > 0 else product.price
+                total = discounted_price * quantity
+                grand_total += total
+                subtotal += price * quantity
+                discount += (price - discounted_price) * quantity
+
+                items.append({
+                    'product_id': product.id,
+                    'original_price': product.price,
+                    'product_name': product.name,
+                    'price': discounted_price,
+                    'quantity': quantity,
+                    'total': total
+                })
 
     if request.method == 'POST':
         full_name = request.form['full_name']
@@ -299,6 +328,7 @@ def checkout():
                 flash("Something went wrong while initializing payment.", "danger")
                 return render_template("errors/general_error.html", error=str(e)), 500
 
+
         elif payment_method == 'cod':
             current_app.logger.info(f"[Bookshop] Processing COD order {unique_order_id}")
             
@@ -332,8 +362,17 @@ def checkout():
                 })
 
             db.session.commit()
+            
+            # Clear cart after successful order
+            if current_user.is_authenticated:
+                Cart.query.filter_by(user_id=current_user.id).delete()
+                db.session.commit()
+            else:
+                session.pop('cart', None)
+            
             current_app.logger.info(f"[Bookshop] Order {unique_order_id} saved locally")
 
+            # ... rest of your email and API sync code ...
             # Send confirmation email
             try:
                 send_order_email(
@@ -415,12 +454,12 @@ def checkout():
                 )
                 flash(f"Order placed, but error syncing to admin dashboard.", "warning")
 
+            
             flash(
                 f"Order placed successfully. Your Order ID is {unique_order_id}. "
                 f"You will pay on delivery.", 
                 "success"
             )
-            session.pop('cart', None)
             return redirect(url_for('main.order_success', order_id=unique_order_id))
 
     return render_template('checkout.html', cart=items, total=grand_total)
