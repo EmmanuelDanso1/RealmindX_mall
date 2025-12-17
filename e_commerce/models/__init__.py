@@ -6,4 +6,4 @@ from .category import Category
 from .order import Order, OrderItem
 from .resource_info import InfoDocument
 from .promotion_flyer import PromotionFlier
-from .cart_routes import Cart
+from .cart import Cart
