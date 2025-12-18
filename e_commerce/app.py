@@ -129,14 +129,6 @@ def create_app():
         
         return {'cart_item_count': count}
 
-    # Cart Totals
-    @app.context_processor
-    def cart_info():
-        cart = session.get('cart', {})
-        total_items = sum(item['quantity'] for item in cart.values())
-        total_amount = sum(item['price'] * item['quantity'] for item in cart.values())
-        return dict(cart_item_count=total_items, cart_total=total_amount)
-
     # Inject categories globally (for navbar dropdown)
     from e_commerce.models import Category
 
