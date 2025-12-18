@@ -46,7 +46,7 @@
             <span class="badge bg-danger mb-2">Out of Stock</span>
           {% endif %}
 
-          <form method="POST" class="mt-3">
+          <form method="POST" action="{{ url_for('cart.add_to_cart', product_id=product.id) }}" class="mt-3">
             <div class="mb-3">
               <label for="quantity" class="form-label">Quantity</label>
               <input type="number" name="quantity" id="quantity" class="form-control" min="1" value="1" required>

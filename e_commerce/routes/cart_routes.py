@@ -661,6 +661,8 @@ def get_cart_items_for_user(user_id=None):
     return items
 
 # Add quantity of products to be purchased
+from flask_login import current_user
+
 @cart_bp.route('/add/<int:product_id>', methods=['GET', 'POST'])
 def add_quantity(product_id):
     product = Product.query.get_or_404(product_id)
@@ -668,21 +670,46 @@ def add_quantity(product_id):
     if request.method == 'POST':
         quantity = int(request.form.get('quantity', 1))
 
-        cart = session.get('cart', {})
-        product_id_str = str(product.id)
+        # LOGGED-IN USER → DATABASE CART
+        if current_user.is_authenticated:
+            cart_item = Cart.query.filter_by(
+                user_id=current_user.id,
+                product_id=product.id
+            ).first()
 
-        if product_id_str in cart:
-            cart[product_id_str]['quantity'] += quantity
+            if cart_item:
+                cart_item.quantity += quantity
+            else:
+                cart_item = Cart(
+                    user_id=current_user.id,
+                    product_id=product.id,
+                    quantity=quantity
+                )
+                db.session.add(cart_item)
+
+            db.session.commit()
+
+        # GUEST USER → SESSION CART
         else:
-            cart[product_id_str] = {
-                'product_id': product.id,
-                'name': product.name,
-                'price': float(product.discounted_price if product.discount_percentage > 0 else product.price),
-                'quantity': quantity
-            }
+            cart = session.get('cart', {})
+            product_id_str = str(product.id)
 
-        session['cart'] = cart
-        session.modified = True
+            if product_id_str in cart:
+                cart[product_id_str]['quantity'] += quantity
+            else:
+                cart[product_id_str] = {
+                    'product_id': product.id,
+                    'name': product.name,
+                    'price': float(
+                        product.discounted_price
+                        if product.discount_percentage > 0
+                        else product.price
+                    ),
+                    'quantity': quantity
+                }
+
+            session['cart'] = cart
+            session.modified = True
 
         flash('Item added to cart successfully.', 'success')
         return redirect(url_for('cart.view_cart'))
