@@ -37,27 +37,26 @@
             {% set ns = namespace(grand_total=0, total_items=0) %}
 
             {% for item in cart %}
-              {% set is_discounted = item.product.discount_percentage and item.product.discount_percentage > 0 %}
-              {% set unit_price = item.product.discounted_price if is_discounted else item.product.price %}
-              {% set total = unit_price * item.quantity %}
-
+              {% set total = item.price * item.quantity %}
               {% set ns.grand_total = ns.grand_total + total %}
               {% set ns.total_items = ns.total_items + item.quantity %}
 
               <li class="list-group-item d-flex justify-content-between align-items-center">
-                {{ item.product.name }} × {{ item.quantity }}
+                {{ item.product_name }} × {{ item.quantity }}
                 <span>GH₵{{ '%.2f'|format(total) }}</span>
               </li>
             {% endfor %}
 
             <li class="list-group-item d-flex justify-content-between">
-              <span><strong>Total Items</strong></span>
-              <span><strong>{{ ns.total_items }}</strong></span>
+              <strong>Total Items</strong>
+              <strong>{{ ns.total_items }}</strong>
             </li>
 
             <li class="list-group-item d-flex justify-content-between">
               <strong>Total</strong>
-              <strong class="text-success">GH₵{{ '%.2f'|format(ns.grand_total) }}</strong>
+              <strong class="text-success">
+                GH₵{{ '%.2f'|format(ns.grand_total) }}
+              </strong>
             </li>
           </ul>
 
