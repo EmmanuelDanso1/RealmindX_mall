@@ -7,7 +7,7 @@ from logging.handlers import RotatingFileHandler
 from e_commerce.routes.oauth_routes import oauth_bp, init_oauth
 from flask_login import current_user
 from datetime import timedelta
-from redis import Redis
+from extensions import limiter
 # Load environment variables
 load_dotenv()
 
