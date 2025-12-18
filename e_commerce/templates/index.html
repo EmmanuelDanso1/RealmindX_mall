@@ -249,5 +249,25 @@
   {% endif %}
 {% endwith %}
 
+<!-- user inactive for 10 minutes -->
+<script>
+  let inactivityTimer;
+  const logoutTime = 10 * 60 * 1000; // 10 minutes
+
+  function resetInactivityTimer() {
+      clearTimeout(inactivityTimer);
+      inactivityTimer = setTimeout(() => {
+          alert("You have been logged out due to inactivity.");
+          window.location.href = "{{ url_for('auth.logout') }}";
+      }, logoutTime);
+  }
+
+  // Reset timer on user activity
+  window.onload = resetInactivityTimer;
+  document.onmousemove = resetInactivityTimer;
+  document.onkeypress = resetInactivityTimer;
+  document.onclick = resetInactivityTimer;
+  document.onscroll = resetInactivityTimer;
+</script>
 </body>
 </html>

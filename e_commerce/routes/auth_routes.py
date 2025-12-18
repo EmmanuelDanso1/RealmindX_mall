@@ -12,6 +12,8 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from e_commerce.models import User
 from e_commerce.forms import UserSignupForm, LoginForm, PasswordResetForm, PasswordResetRequestForm
 from urllib.parse import urlparse, urljoin
+# rate limiting
+from extensions import limiter
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -56,6 +58,7 @@ def is_safe_url(target):
 
 
 @auth_bp.route('/user/login', methods=['GET', 'POST'])
+@limiter.limit("5 per 10 minutes")
 def login():
     form = LoginForm()
 

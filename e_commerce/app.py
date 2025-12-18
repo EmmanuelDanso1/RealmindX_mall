@@ -6,6 +6,8 @@ import logging
 from logging.handlers import RotatingFileHandler
 from e_commerce.routes.oauth_routes import oauth_bp, init_oauth
 from flask_login import current_user
+from datetime import timedelta
+from redis import Redis
 # Load environment variables
 load_dotenv()
 
@@ -110,6 +112,31 @@ def create_app():
     app.register_blueprint(api_bp)
     app.register_blueprint(cart_bp)
     app.register_blueprint(auth_bp)
+
+    # SESSION CONFIGURATION: 10 minutes inactivity timeout
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=10)
+
+    # logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s'
+    )
+    # redis config
+    # Load config
+    app.config.from_object("config.ProductionConfig")
+
+    # Initialize Redis connection
+    global redis_client
+    redis_client = Redis(
+        host=app.config["REDIS_HOST"],
+        port=app.config["REDIS_PORT"],
+        password=app.config["REDIS_PASSWORD"],
+        decode_responses=True
+    )
+
+     # rate limiting
+    # Initialize limiter with app
+    limiter.init_app(app)
 
     @app.context_processor
     def inject_cart_count():

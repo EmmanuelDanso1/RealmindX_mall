@@ -24,6 +24,7 @@ def init_oauth(app):
 
 
 @oauth_bp.route('/login/google')
+@limiter.limit("10 per hour")
 def google_login():
     """Initiate Google OAuth login"""
     if current_user.is_authenticated:
