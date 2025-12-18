@@ -6,6 +6,7 @@ from extensions import db
 from extensions import limiter
 import os
 
+
 oauth_bp = Blueprint('oauth', __name__)
 oauth = OAuth()
 
