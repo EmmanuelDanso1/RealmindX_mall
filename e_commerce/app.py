@@ -8,6 +8,7 @@ from e_commerce.routes.oauth_routes import oauth_bp, init_oauth
 from flask_login import current_user
 from datetime import timedelta
 from extensions import limiter
+from redis import Redis
 # Load environment variables
 load_dotenv()
 
