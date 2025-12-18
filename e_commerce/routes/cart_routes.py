@@ -70,7 +70,11 @@ def get_cart():
 def add_to_cart(product_id):
     product = Product.query.get_or_404(product_id)
     
+    current_app.logger.info(f"[Add to Cart] Product {product_id} - User authenticated: {current_user.is_authenticated}")
+    
     if current_user.is_authenticated:
+        current_app.logger.info(f"[Add to Cart] Adding to DB cart for user {current_user.id}")
+        
         # Add to database cart
         cart_item = Cart.query.filter_by(
             user_id=current_user.id,
@@ -79,6 +83,7 @@ def add_to_cart(product_id):
         
         if cart_item:
             cart_item.quantity += 1
+            current_app.logger.info(f"[Add to Cart] Updated existing cart item, new quantity: {cart_item.quantity}")
         else:
             cart_item = Cart(
                 user_id=current_user.id,
@@ -86,10 +91,27 @@ def add_to_cart(product_id):
                 quantity=1
             )
             db.session.add(cart_item)
+            current_app.logger.info(f"[Add to Cart] Created new cart item")
         
-        db.session.commit()
-        current_app.logger.info(f"[Cart] User {current_user.id} added product {product_id} to cart")
+        try:
+            db.session.commit()
+            current_app.logger.info(f"[Add to Cart] ✓ Committed to database successfully")
+            
+            # Verify it was saved
+            verify = Cart.query.filter_by(user_id=current_user.id, product_id=product_id).first()
+            if verify:
+                current_app.logger.info(f"[Add to Cart] ✓ Verified in DB: quantity={verify.quantity}")
+            else:
+                current_app.logger.error(f"[Add to Cart] ✗ NOT FOUND in DB after commit!")
+                
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.exception(f"[Add to Cart] ✗ Database error: {e}")
+            flash(f"Error adding to cart: {e}", "danger")
+            return redirect(request.referrer or url_for('main.home'))
+            
     else:
+        current_app.logger.info(f"[Add to Cart] Adding to session cart")
         # Add to session cart
         cart = session.get('cart', {})
         product_id_str = str(product.id)
