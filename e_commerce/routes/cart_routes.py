@@ -120,8 +120,14 @@ def view_cart():
         # Get from database
         cart_items = Cart.query.filter_by(user_id=current_user.id).all()
         
+        current_app.logger.info(f"[Cart View] User {current_user.id} has {len(cart_items)} items in DB")
+        
         for cart_item in cart_items:
             product = cart_item.product
+            if not product:
+                current_app.logger.warning(f"[Cart View] Product not found for cart item {cart_item.id}")
+                continue
+                
             quantity = cart_item.quantity
             price = product.discounted_price if product.discount_percentage > 0 else product.price
             total += price * quantity
@@ -130,9 +136,13 @@ def view_cart():
                 'quantity': quantity,
                 'subtotal': price * quantity
             })
+            
+        current_app.logger.info(f"[Cart View] Prepared {len(items)} items for display")
     else:
         # Get from session
-        cart = get_cart()
+        cart = session.get('cart', {})
+        current_app.logger.info(f"[Cart View] Guest has {len(cart)} items in session")
+        
         for product_id, item in cart.items():
             product = Product.query.get(int(product_id))
             if product:
@@ -146,6 +156,29 @@ def view_cart():
                 })
 
     return render_template('cart.html', cart=items, total=total)
+
+# debug cart
+@cart_bp.route('/cart/debug')
+@login_required
+def debug_cart():
+    """Debug route to check cart"""
+    from e_commerce.models import Cart
+    cart_items = Cart.query.filter_by(user_id=current_user.id).all()
+    
+    debug_html = f"""
+    <h2>Debug Info for User {current_user.id}</h2>
+    <p>DB Cart Items: {len(cart_items)}</p>
+    <ul>
+    """
+    
+    for item in cart_items:
+        debug_html += f"<li>Product ID: {item.product_id}, Quantity: {item.quantity}, Product: {item.product.name if item.product else 'NOT FOUND'}</li>"
+    
+    debug_html += "</ul>"
+    debug_html += f"<p><a href='/cart'>Go to Cart</a></p>"
+    
+    return debug_html
+
 
 # Remove item from cart
 @cart_bp.route('/cart/remove/<int:product_id>', methods=['POST'])
