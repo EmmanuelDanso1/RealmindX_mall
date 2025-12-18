@@ -2,7 +2,6 @@ from flask import Blueprint, redirect, url_for, session, flash, current_app
 from flask_login import login_user, current_user
 from authlib.integrations.flask_client import OAuth
 from e_commerce.models import User
-from flask_limiter import Limiter
 from extensions import db
 from extensions import limiter
 import os
