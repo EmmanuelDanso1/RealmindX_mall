@@ -454,10 +454,8 @@ def delete_info_document(id):
         current_app.logger.exception("Info delete failed")
         return jsonify({'error': str(e)}), 400
 
-# update for status check
 @api_bp.route('/api/orders/<string:order_id>/status', methods=['POST'])
 def update_order_status_api(order_id):
-    # Use original_order_id here, which is a string
     order = Order.query.filter_by(order_id=order_id).first()
     if not order:
         return jsonify({'error': 'Order not found'}), 404
@@ -467,14 +465,18 @@ def update_order_status_api(order_id):
         return jsonify({'error': 'Missing status'}), 400
 
     new_status = data['status']
-    if new_status not in ['Received', 'In Process', 'Delivered']:
-        return jsonify({'error': 'Invalid status'}), 400
+
+    allowed_statuses = ['Received', 'Processing', 'Shipped', 'Delivered']
+    if new_status not in allowed_statuses:
+        return jsonify({
+            'error': 'Invalid status',
+            'allowed': allowed_statuses
+        }), 400
 
     order.status = new_status
     db.session.commit()
 
-    return jsonify({'success': True, 'status': new_status})
-
+    return jsonify({'success': True, 'status': new_status}), 200
 
 # recieves post api
 @api_bp.route('/api/fliers', methods=['POST'])
