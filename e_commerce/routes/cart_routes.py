@@ -618,6 +618,7 @@ def payment_callback():
                 'user_id': metadata.get('user_id'),
                 'full_name': order.full_name,
                 'email': order.email,
+                'phone': phone,
                 'address': order.address,
                 'total_amount': order.total_amount,
                 'payment_method': 'paystack',
