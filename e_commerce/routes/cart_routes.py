@@ -393,6 +393,7 @@ def checkout():
                 order_id=unique_order_id,
                 full_name=full_name,
                 email=email,
+                phone=phone,
                 address=address,
                 total_amount=grand_total,
                 payment_method='cash on delivery',

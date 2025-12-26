@@ -8,6 +8,7 @@ class Order(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     full_name = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(120), nullable=False)
+    phone = db.Column(db.String(20), nullable=False)
     address = db.Column(db.Text, nullable=False)
     total_amount = db.Column(db.Float, nullable=False)
     payment_method = db.Column(db.String(50), nullable=False)
