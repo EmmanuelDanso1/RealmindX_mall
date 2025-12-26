@@ -3,6 +3,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, session,
 from flask_login import login_required, current_user
 import requests
 from e_commerce.utils.helpers import get_random_unique_order_id
+from e_commerce.utils.emails import send_admin_order_email
 from e_commerce.models import Product, Order, OrderItem, Cart
 from extensions import db, mail
 from flask_mail import Message
@@ -417,6 +418,18 @@ def checkout():
                 })
 
             db.session.commit()
+
+            # Notify admin (COD)
+            try:
+                send_admin_order_email(order, order_items_data)
+                current_app.logger.info(
+                    f"[Bookshop] Admin notified (COD) for order {unique_order_id}"
+                )
+            except Exception as e:
+                current_app.logger.error(
+                    f"[Bookshop] Failed to notify admin (COD) for order {unique_order_id}: {e}"
+                )
+
             
             # Clear cart after successful order
             if current_user.is_authenticated:
@@ -580,6 +593,17 @@ def payment_callback():
             })
 
         db.session.commit()
+        # Notify admin (Paystack)
+        try:
+            send_admin_order_email(order, order_items_data)
+            current_app.logger.info(
+                f"[Bookshop] Admin notified (Paystack) for order {unique_order_id}"
+            )
+        except Exception as e:
+            current_app.logger.error(
+                f"[Bookshop] Failed to notify admin (Paystack) for order {unique_order_id}: {e}"
+            )
+
 
         # Compute subtotal & discount safely
         subtotal = sum(i['original_price'] * i['quantity'] for i in order_items_data)
