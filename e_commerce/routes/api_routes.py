@@ -5,7 +5,7 @@ from extensions import db
 import os
 import uuid
 import json
-from e_commerce.utils.helpers import allowed_file, allowed_image_file, generate_random_order_id
+from e_commerce.utils.helpers import allowed_file, allowed_image_file, generate_random_order_id, FLIERS_UPLOAD_DIR
 from flask import send_from_directory
 import traceback
 import logging
