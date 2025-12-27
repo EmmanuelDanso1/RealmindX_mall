@@ -3,6 +3,7 @@ from werkzeug.utils import secure_filename
 from e_commerce.models import Product, Category, InfoDocument, OrderItem, Order, PromotionFlier, NewsletterSubscriber
 from extensions import db
 import os
+import uuid
 import json
 from e_commerce.utils.helpers import allowed_file, allowed_image_file, generate_random_order_id
 from flask import send_from_directory
@@ -478,52 +479,68 @@ def update_order_status_api(order_id):
 
     return jsonify({'success': True, 'status': new_status}), 200
 
-# recieves post api
 @api_bp.route('/api/fliers', methods=['POST'])
 def receive_flier():
-    # Check Authorization header 
     token = request.headers.get('Authorization')
+
     if not token or token != f"Bearer {os.getenv('API_TOKEN')}":
+        current_app.logger.warning("Unauthorized flier POST attempt")
         return jsonify({'error': 'Unauthorized'}), 401
 
     try:
-        # Extract title (optional) and image (required)
         title = request.form.get('title', '').strip()
-        image_file = request.files.get('image')  # ✅ FIXED: match the input field name
+        image_file = request.files.get('image')
 
         if not image_file:
+            current_app.logger.warning("Flier POST missing image")
             return jsonify({'error': 'Image file is required'}), 400
 
         if not allowed_image_file(image_file.filename):
-            return jsonify({'error': 'Invalid image format. Allowed: jpg, jpeg, png, gif, webp'}), 400
+            current_app.logger.warning(
+                f"Invalid image format received: {image_file.filename}"
+            )
+            return jsonify({'error': 'Invalid image format'}), 400
 
-        # Ensure upload directory exists
-        flier_dir = os.path.join(current_app.root_path, 'static', 'uploads', 'fliers')
-        os.makedirs(flier_dir, exist_ok=True)
+        os.makedirs(FLIERS_UPLOAD_DIR, exist_ok=True)
 
-        # Save the image
-        image_filename = secure_filename(image_file.filename)
-        image_path = os.path.join(flier_dir, image_filename)
+        ext = os.path.splitext(image_file.filename)[1]
+        filename = f"{uuid.uuid4().hex}{ext}"
+        image_path = os.path.join(FLIERS_UPLOAD_DIR, filename)
+
         image_file.save(image_path)
 
-        # Save to DB
-        flier = PromotionFlier(title=title, image_filename=image_filename)
+        flier = PromotionFlier(
+            title=title,
+            image_filename=filename
+        )
         db.session.add(flier)
         db.session.commit()
 
-        return jsonify({'message': 'Flier received', 'id': flier.id}), 201
+        current_app.logger.info(
+            f"Flier received (id={flier.id}, title='{title}')"
+        )
 
-    except Exception as e:
-        print("Flier API Error:", e)
-        return jsonify({'error': str(e)}), 400
+        return jsonify({
+            'message': 'Flier received',
+            'id': flier.id
+        }), 201
+
+    except Exception:
+        current_app.logger.exception("Exception while receiving flier")
+        return jsonify({'error': 'Internal server error'}), 500
 
 @api_bp.route('/api/fliers/<int:flier_id>', methods=['PUT'])
 def update_flier(flier_id):
     token = request.headers.get('Authorization')
+
     if not token or token != f"Bearer {os.getenv('API_TOKEN')}":
+        current_app.logger.warning(
+            f"Unauthorized flier UPDATE attempt (id={flier_id})"
+        )
         return jsonify({'error': 'Unauthorized'}), 401
 
     flier = PromotionFlier.query.get_or_404(flier_id)
+
     try:
         title = request.form.get('title', '').strip()
         image_file = request.files.get('image')
@@ -533,50 +550,75 @@ def update_flier(flier_id):
 
         if image_file:
             if not allowed_image_file(image_file.filename):
+                current_app.logger.warning(
+                    f"Invalid image format on update (id={flier_id})"
+                )
                 return jsonify({'error': 'Invalid image format'}), 400
 
-            # Delete old image
-            old_path = os.path.join(current_app.root_path, 'static', 'uploads', 'fliers', flier.image_filename)
+            old_path = os.path.join(
+                FLIERS_UPLOAD_DIR, flier.image_filename
+            )
             if os.path.exists(old_path):
                 os.remove(old_path)
 
-            # Save new image
-            image_filename = secure_filename(image_file.filename)
-            new_path = os.path.join(current_app.root_path, 'static', 'uploads', 'fliers', image_filename)
-            os.makedirs(os.path.dirname(new_path), exist_ok=True)
+            ext = os.path.splitext(image_file.filename)[1]
+            filename = f"{uuid.uuid4().hex}{ext}"
+            new_path = os.path.join(FLIERS_UPLOAD_DIR, filename)
+
             image_file.save(new_path)
-            flier.image_filename = image_filename
+            flier.image_filename = filename
 
         db.session.commit()
+
+        current_app.logger.info(
+            f"Flier updated (id={flier.id})"
+        )
+
         return jsonify({'message': 'Flier updated'}), 200
 
-    except Exception as e:
-        print("Update Flier Error:", e)
-        return jsonify({'error': str(e)}), 400
+    except Exception:
+        current_app.logger.exception(
+            f"Exception updating flier (id={flier_id})"
+        )
+        return jsonify({'error': 'Internal server error'}), 500
+
 
 @api_bp.route('/api/fliers/<int:flier_id>', methods=['DELETE'])
 def delete_flier(flier_id):
     token = request.headers.get('Authorization')
+
     if not token or token != f"Bearer {os.getenv('API_TOKEN')}":
+        current_app.logger.warning(
+            f"Unauthorized flier DELETE attempt (id={flier_id})"
+        )
         return jsonify({'error': 'Unauthorized'}), 401
 
     flier = PromotionFlier.query.get_or_404(flier_id)
 
     try:
-        # Delete the image file from disk
-        image_path = os.path.join(current_app.root_path, 'static', 'uploads', 'fliers', flier.image_filename)
+        image_path = os.path.join(
+            FLIERS_UPLOAD_DIR, flier.image_filename
+        )
+
         if os.path.exists(image_path):
             os.remove(image_path)
 
         db.session.delete(flier)
         db.session.commit()
+
+        current_app.logger.info(
+            f"Flier deleted (id={flier_id})"
+        )
+
         return jsonify({'message': 'Flier deleted'}), 200
 
-    except Exception as e:
-        print("Delete Flier Error:", e)
- 
-        return jsonify({'error': str(e)}), 400
-    
+    except Exception:
+        current_app.logger.exception(
+            f"Exception deleting flier (id={flier_id})"
+        )
+        return jsonify({'error': 'Internal server error'}), 500
+
+
 # Get verified newsletter subscribers
 @api_bp.route('/api/newsletter-subscribers', methods=['GET'])
 def get_newsletter_subscribers():

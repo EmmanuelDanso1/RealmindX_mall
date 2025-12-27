@@ -1,6 +1,9 @@
 import datetime
 import random
 from e_commerce.models import Order
+from flask import request, jsonify, current_app
+import os
+
 
 ALLOWED_IMAGE_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif', 'webp'}
 ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx'}
@@ -25,4 +28,6 @@ def get_random_unique_order_id():
             return new_id
 
 
-
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+FLIERS_UPLOAD_DIR = os.path.join(
+    BASE_DIR, 'static', 'uploads', 'fliers')
