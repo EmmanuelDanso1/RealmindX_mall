@@ -18,3 +18,7 @@
 [2025-12-26 16:14:06,958] INFO in oauth_routes: [Bookshop OAuth] Google OAuth initialized
 [2025-12-27 13:25:39,618] INFO in app:  Bookshop application started
 [2025-12-27 13:25:39,619] INFO in oauth_routes: [Bookshop OAuth] Google OAuth initialized
+[2025-12-29 18:57:34,728] INFO in app:  Bookshop application started
+[2025-12-29 18:57:34,728] INFO in oauth_routes: [Bookshop OAuth] Google OAuth initialized
+[2025-12-29 18:57:45,563] INFO in app:  Bookshop application started
+[2025-12-29 18:57:45,564] INFO in oauth_routes: [Bookshop OAuth] Google OAuth initialized
