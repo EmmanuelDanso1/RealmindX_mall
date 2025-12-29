@@ -22,11 +22,6 @@
                style="height: 400px; object-fit: cover;"
                alt="{{ flier.title or 'Promotion Flier' }}">
 
-          {% if flier.title %}
-            <div class="carousel-caption d-block bg-dark bg-opacity-50 rounded p-3">
-              <h5>{{ flier.title }}</h5>
-            </div>
-          {% endif %}
         </div>
       {% endfor %}
     </div>
