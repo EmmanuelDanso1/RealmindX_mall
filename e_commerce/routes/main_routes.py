@@ -6,6 +6,7 @@ from e_commerce.utils.helpers import generate_random_order_id
 from extensions import db, mail
 from e_commerce.models import Product, ProductRating, NewsletterSubscriber, Category,PromotionFlier, Order, OrderItem, InfoDocument
 from e_commerce.utils.token import generate_verification_token, confirm_verification_token
+import logging
 
 main_bp = Blueprint('main', __name__)
 
@@ -15,6 +16,13 @@ def home():
     per_page = 9 
     # post fliers
     fliers = PromotionFlier.query.order_by(PromotionFlier.id.desc()).all()
+    
+    # DEBUG: Log what we found
+    current_app.logger.info(f"=== HOME PAGE DEBUG ===")
+    current_app.logger.info(f"Total fliers: {len(fliers)}")
+    for f in fliers:
+        current_app.logger.info(f"Flier {f.id}: title='{f.title}', filename='{f.image_filename}'")
+    
     products = Product.query.order_by(Product.date_created.desc()).paginate(
         page=page,
         per_page=per_page,
