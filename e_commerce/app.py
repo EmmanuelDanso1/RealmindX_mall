@@ -14,7 +14,7 @@ load_dotenv()
 
 
 def create_app():
-    app = Flask(__name__, static_folder='static', static_url_path='/static')
+    app = Flask(__name__, static_folder='e_commerce/static', static_url_path='/static')
 
     # mail config
     app.config['MAIL_SERVER'] = 'smtp.gmail.com'
