@@ -28,6 +28,5 @@ def get_random_unique_order_id():
             return new_id
 
 
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-FLIERS_UPLOAD_DIR = os.path.join(
-    BASE_DIR, 'static', 'uploads', 'fliers')
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+FLIERS_UPLOAD_DIR = os.path.join(BASE_DIR, 'e_commerce', 'static', 'uploads', 'fliers')
