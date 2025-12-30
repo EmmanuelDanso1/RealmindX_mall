@@ -9,6 +9,11 @@ class User(UserMixin, db.Model):
     full_name = db.Column(db.String(150), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=True)
+    # Email verification
+    is_verified = db.Column(db.Boolean, default=False)
+    otp_code = db.Column(db.String(6), nullable=True)
+    otp_expiry = db.Column(db.DateTime, nullable=True)
+    
     # google auth
     google_id = db.Column(db.String(255), unique=True, nullable=True)
     is_oauth_user = db.Column(db.Boolean, default=False)

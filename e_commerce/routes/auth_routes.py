@@ -12,6 +12,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from e_commerce.models import User
 from e_commerce.forms import UserSignupForm, LoginForm, PasswordResetForm, PasswordResetRequestForm
 from urllib.parse import urlparse, urljoin
+from e_commerce.utils.otp_utils import generate_otp, otp_expiry_time
 # rate limiting
 from extensions import limiter
 
@@ -75,6 +76,11 @@ def login():
         if not user.password or not check_password_hash(user.password, form.password.data):
             flash('Invalid credentials', 'danger')
             return render_template('auth/login.html', form=form)
+        
+        # Check if email is verified
+        if not user.is_verified:
+            flash("Please verify your email before logging in.", "warning")
+            return redirect(url_for('auth.verify_otp', user_id=user.id))
 
         login_user(user)
 
@@ -90,7 +96,54 @@ def login():
 
     return render_template('auth/login.html', form=form)
 
+# Verify otp
+@auth_bp.route('/verify-otp/<int:user_id>', methods=['GET', 'POST'])
+def verify_otp(user_id):
+    user = User.query.get_or_404(user_id)
 
+    if request.method == 'POST':
+        entered_otp = request.form.get('otp')
+
+        if entered_otp != user.otp_code:
+            flash('Invalid verification code.', 'danger')
+            return redirect(url_for('auth.verify_otp', user_id=user.id))
+
+        if datetime.utcnow() > user.otp_expiry:
+            flash('OTP has expired. Please request a new one.', 'danger')
+            return redirect(url_for('auth.resend_otp', user_id=user.id))
+
+        user.is_verified = True
+        user.otp_code = None
+        user.otp_expiry = None
+
+        db.session.commit()
+        login_user(user)
+
+        flash('Your email has been verified! Welcome.', 'success')
+        return redirect(url_for('user.users_dashboard'))
+
+    return render_template('verify_otp.html', user=user)
+
+# Resend OTP
+@auth_bp.route('/resend-otp/<int:user_id>')
+def resend_otp(user_id):
+    user = User.query.get_or_404(user_id)
+
+    otp = generate_otp()
+    user.otp_code = otp
+    user.otp_expiry = otp_expiry_time()
+    db.session.commit()
+
+    msg = Message(
+        subject="New Verification Code",
+        recipients=[user.email],
+        sender="realmindxgh@gmail.com"
+    )
+    msg.body = f"Your new verification code is: {otp}"
+    mail.send(msg)
+
+    flash('A new OTP has been sent to your email.', 'success')
+    return redirect(url_for('auth.verify_otp', user_id=user.id))
 
 @auth_bp.route('/logout', methods=['GET', 'POST'])
 @login_required
