@@ -5,7 +5,7 @@ from flask_wtf.file import FileAllowed
 from e_commerce.models import User
 
 class UserSignupForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(min=4, max=25)])
+    full_name = StringField('Full Name', validators=[DataRequired(), Length(min=4, max=25)])
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])

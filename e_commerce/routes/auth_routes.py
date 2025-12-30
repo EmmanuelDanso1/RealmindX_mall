@@ -28,14 +28,12 @@ def user_signup():
             flash('Email already registered. Please log in.', 'danger')
             return redirect(url_for('auth.login'))
 
-        if User.query.filter_by(username=form.username.data).first():
-            flash('Username already taken. Please choose another.', 'danger')
-            return redirect(url_for('auth.user_signup'))
 
         new_user = User(
-            username=form.username.data,
+            full_name=form.full_name.data,
             email=form.email.data,
-            password=generate_password_hash(form.password.data)
+            password=generate_password_hash(form.password.data),
+            is_oauth_user=False
         )
         db.session.add(new_user)
         db.session.commit()
@@ -47,7 +45,6 @@ def user_signup():
         return redirect(url_for('main.shop'))
 
     return render_template('auth/signup.html', form=form)
-
 
 
 def is_safe_url(target):
@@ -65,23 +62,34 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
 
-        if user and check_password_hash(user.password, form.password.data):
-            login_user(user)
-            
-            # Sync session cart to database (ADD THIS)
-            from e_commerce.routes.cart_routes import sync_session_to_db
-            sync_session_to_db()
+        if not user:
+            flash('Invalid credentials', 'danger')
+            return render_template('auth/login.html', form=form)
 
-            next_page = request.args.get('next') or session.pop('next', None)
+        # Block OAuth users from password login
+        if user.is_oauth_user:
+            flash('Please sign in using Google', 'warning')
+            return redirect(url_for('auth.login'))
 
-            if next_page and is_safe_url(next_page):
-                return redirect(next_page)
+        #  Normal password check
+        if not user.password or not check_password_hash(user.password, form.password.data):
+            flash('Invalid credentials', 'danger')
+            return render_template('auth/login.html', form=form)
 
-            return redirect(url_for('main.shop'))
+        login_user(user)
 
-        flash('Invalid credentials', 'danger')
+        # Sync session cart to database
+        from e_commerce.routes.cart_routes import sync_session_to_db
+        sync_session_to_db()
+
+        next_page = request.args.get('next') or session.pop('next', None)
+        if next_page and is_safe_url(next_page):
+            return redirect(next_page)
+
+        return redirect(url_for('main.shop'))
 
     return render_template('auth/login.html', form=form)
+
 
 
 @auth_bp.route('/logout', methods=['GET', 'POST'])
@@ -90,14 +98,20 @@ def logout():
     logout_user()
     session.clear()
     flash('You have been logged out.', 'info')
-    return redirect(url_for('main.home'))  # adjust as needed
+    return redirect(url_for('main.home'))
 
 @auth_bp.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
     form = PasswordResetRequestForm()
+
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
+
         if user:
+            if user.is_oauth_user:
+                flash('This account uses Google sign-in. Please log in with Google.', 'warning')
+                return redirect(url_for('auth.login'))
+
             token = s.dumps(user.email, salt='password-reset-salt')
             reset_link = url_for('auth.reset_password', token=token, _external=True)
 
@@ -108,7 +122,7 @@ def forgot_password():
                     recipients=[user.email]
                 )
                 msg.body = f"""
-Hello {user.username},
+Hello {user.full_name},
 
 We received a request to reset your password.
 
@@ -123,29 +137,11 @@ RealmIndx Support Team
                 mail.send(msg)
                 flash('Password reset link has been sent to your email.', 'info')
             except Exception as e:
-                print(f"Email sending failed: {e}")
+                current_app.logger.error(f"Email sending failed: {e}")
                 flash('Could not send email. Please try again later.', 'danger')
         else:
             flash('No account found with that email.', 'danger')
+
         return redirect(url_for('auth.login'))
 
     return render_template('auth/forgot_password.html', form=form)
-
-# password reset
-@auth_bp.route('/reset-password/<token>', methods=['GET', 'POST'])
-def reset_password(token):
-    try:
-        email = s.loads(token, salt='password-reset-salt', max_age=3600)
-    except:
-        flash('The password reset link is invalid or has expired.', 'danger')
-        return redirect(url_for('auth.forgot_password'))
-
-    form = PasswordResetForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(email=email).first_or_404()
-        user.set_password(form.password.data)  # Ensure `set_password()` hashes and sets the password
-        db.session.commit()
-        flash('Your password has been updated.', 'success')
-        return redirect(url_for('auth.login'))
-
-    return render_template('auth/reset_password.html', form=form)

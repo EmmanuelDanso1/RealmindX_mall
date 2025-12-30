@@ -5,7 +5,7 @@ from e_commerce.models import User
 from extensions import db
 from extensions import limiter
 import os
-
+import logging
 
 oauth_bp = Blueprint('oauth', __name__)
 oauth = OAuth()
@@ -42,36 +42,34 @@ def google_callback():
     try:
         token = oauth.google.authorize_access_token()
         user_info = token.get('userinfo')
-        
+
         if not user_info:
             flash('Failed to get user information from Google.', 'danger')
             return redirect(url_for('auth.login'))
-        
+
         email = user_info.get('email')
         google_id = user_info.get('sub')
-        
-        if not email:
-            flash('Email not provided by Google.', 'danger')
+        full_name = user_info.get('name')
+
+        if not email or not google_id:
+            flash('Required information not provided by Google.', 'danger')
             return redirect(url_for('auth.login'))
-        
+
         user = User.query.filter_by(email=email).first()
-        
+
         if user:
+            # Link Google account if not already linked
             if not user.google_id:
                 user.google_id = google_id
+                user.is_oauth_user = True
                 db.session.commit()
+
             current_app.logger.info(f"[OAuth] Existing user logged in: {email}")
+
         else:
-            username = email.split('@')[0]
-            base_username = username
-            counter = 1
-            
-            while User.query.filter_by(username=username).first():
-                username = f"{base_username}{counter}"
-                counter += 1
-            
+            # Create new OAuth user
             user = User(
-                username=username,
+                full_name=full_name or email.split('@')[0],
                 email=email,
                 google_id=google_id,
                 password=None,
@@ -79,13 +77,13 @@ def google_callback():
             )
             db.session.add(user)
             db.session.commit()
-            
+
             current_app.logger.info(f"[OAuth] New user created: {email}")
             flash('Account created successfully with Google!', 'success')
-        
+
         login_user(user)
         return redirect(url_for('main.shop'))
-        
+
     except Exception as e:
         current_app.logger.exception(f"[OAuth] Error: {e}")
         flash('An error occurred during Google login.', 'danger')
