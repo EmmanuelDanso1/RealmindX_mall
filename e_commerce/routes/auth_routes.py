@@ -98,7 +98,7 @@ def logout():
     logout_user()
     session.clear()
     flash('You have been logged out.', 'info')
-    return redirect(url_for('main.home'))
+    return redirect(url_for('auth.login'))
 
 @auth_bp.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():

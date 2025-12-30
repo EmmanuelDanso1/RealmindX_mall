@@ -95,7 +95,7 @@
             <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-sm me-2 rounded-pill">Login</a>
             <a href="{{ url_for('auth.user_signup') }}" class="btn  btn-sm rounded-pill" style="background-color: #143670; color: #fff">Signup</a>
           {% else %}
-            <span class="me-3">Welcome, {{ current_user.username }}</span>
+            <span class="me-3">Welcome, {{ current_user.full_name }}</span>
             <a class="nav-link me-3" href="{{ url_for('main.purchased_products') }}"><i class="fas fa-box-open me-1"></i> My Orders</a>
             <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger btn-sm rounded-pill">Logout</a>
           {% endif %}
