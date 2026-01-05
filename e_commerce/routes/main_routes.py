@@ -58,23 +58,34 @@ def view_product(product_id):
 
 from sqlalchemy import func
 
-@main_bp.route('/track-your-order', methods=['GET', 'POST'])
+@main_bp.route('/track-order', methods=['GET', 'POST'])
 def track_order():
-    order = None
+    """Track order by order ID - no login required"""
+    from flask import request
+    
     if request.method == 'POST':
-        order_id = request.form['order_id'].strip()
-        billing_email = request.form['billing_email'].strip().lower()
-
-        # Query the order using alphanumeric order_id and case-insensitive email
-        order = Order.query.filter(
-            Order.order_id == order_id,
-            func.lower(Order.email) == billing_email
-        ).first()
-
+        order_id = request.form.get('order_id', '').strip()
+        email = request.form.get('email', '').strip()
+        
+        if not order_id:
+            flash("Please enter an order ID.", "warning")
+            return render_template('track_order.html')
+        
+        # Find order by order_id and optionally verify email
+        order = Order.query.filter_by(order_id=order_id).first()
+        
         if not order:
-            flash("No order found with that Order ID and Email address.", "warning")
-
-    return render_template("track_order.html", order=order)
+            flash("Order not found. Please check your order ID.", "danger")
+            return render_template('track_order.html')
+        
+        # Optionally verify email for security
+        if email and order.email.lower() != email.lower():
+            flash("Order ID and email do not match.", "danger")
+            return render_template('track_order.html')
+        
+        return render_template('order_details.html', order=order)
+    
+    return render_template('track_order.html')
 
 
 # NewsLetter subscription for Bookshop
@@ -225,12 +236,25 @@ def delete_ordered_product(product_id):
 
 
 #  order successful
-@main_bp.route('/order-success/<string:order_id>')
-@login_required
+@main_bp.route('/order-success/<order_id>')
 def order_success(order_id):
-    order = Order.query.filter_by(order_id=order_id).first_or_404()
-    return render_template('order_success.html', order=order)
-
+    """Order success page - accessible to both authenticated and guest users"""
+    
+    # Find the order by order_id (not by user_id, since guests don't have one)
+    order = Order.query.filter_by(order_id=order_id).first()
+    
+    if not order:
+        flash("Order not found.", "danger")
+        return redirect(url_for('main.home'))
+    
+    # Optional: Verify order belongs to current user if authenticated
+    # But allow all users to view if they have the order_id
+    if current_user.is_authenticated and order.user_id:
+        if order.user_id != current_user.id:
+            flash("You don't have permission to view this order.", "danger")
+            return redirect(url_for('main.home'))
+    
+    return render_template('order_success.html', order=order, order_id=order.order_id)
 
 
 # autocomplete text
