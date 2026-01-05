@@ -5,7 +5,7 @@ class Cart(db.Model):
     __tablename__ = 'cart'
     
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
     quantity = db.Column(db.Integer, default=1, nullable=False)
     added_on = db.Column(db.DateTime, default=datetime.utcnow)

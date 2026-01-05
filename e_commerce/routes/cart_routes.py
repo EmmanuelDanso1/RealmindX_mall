@@ -287,7 +287,7 @@ def checkout():
                 'total': total
             })
     else:
-        # Get from session (fallback for guests)
+        # Get from session (for guests)
         cart = session.get('cart', {})
         if not cart:
             flash("Your cart is empty.", "warning")
@@ -322,8 +322,12 @@ def checkout():
 
         unique_order_id = get_random_unique_order_id()
         
+        # Use user ID only if authenticated, otherwise use None or guest identifier
+        user_id = current_user.id if current_user.is_authenticated else None
+        user_identifier = f"user {user_id}" if user_id else "guest user"
+        
         current_app.logger.info(
-            f"[Bookshop] Checkout initiated by user {current_user.id} - Order ID: {unique_order_id}"
+            f"[Bookshop] Checkout initiated by {user_identifier} - Order ID: {unique_order_id}"
         )
 
         if payment_method == 'paystack':
@@ -339,7 +343,7 @@ def checkout():
                     "full_name": full_name,
                     "order_id": unique_order_id,
                     "address": address,
-                    "user_id": current_user.id,
+                    "user_id": user_id,  # Will be None for guests
                     "cart": items,
                     "phone": phone
                 },
@@ -387,8 +391,9 @@ def checkout():
         elif payment_method == 'cod':
             current_app.logger.info(f"[Bookshop] Processing COD order {unique_order_id}")
             
+            # FIX: user_id can be None for guest orders
             order = Order(
-                user_id=current_user.id,
+                user_id=user_id,  # None for guests
                 order_id=unique_order_id,
                 full_name=full_name,
                 email=email,
@@ -440,7 +445,6 @@ def checkout():
             
             current_app.logger.info(f"[Bookshop] Order {unique_order_id} saved locally")
 
-            # ... rest of your email and API sync code ...
             # Send confirmation email
             try:
                 send_order_email(
@@ -471,7 +475,7 @@ def checkout():
                 else:
                     api_data = {
                         'order_id': unique_order_id,
-                        'user_id': current_user.id,
+                        'user_id': user_id,  # None for guests
                         'full_name': full_name,
                         'email': email,
                         'address': address,
@@ -531,7 +535,6 @@ def checkout():
             return redirect(url_for('main.order_success', order_id=unique_order_id))
 
     return render_template('checkout.html', cart=items, total=grand_total)
-
 
 @cart_bp.route('/payment/callback')
 def payment_callback():
