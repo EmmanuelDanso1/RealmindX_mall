@@ -560,6 +560,7 @@ def payment_callback():
         cart_items = metadata.get('cart', [])
         phone = metadata.get('phone', '')
         unique_order_id = metadata.get('order_id')
+        user_id = metadata.get('user_id')  # Can be None for guests
 
         if not unique_order_id or not cart_items:
             flash("Missing order details. Contact support.", "danger")
@@ -567,7 +568,7 @@ def payment_callback():
 
         order = Order(
             order_id=unique_order_id,
-            user_id=metadata.get('user_id'),
+            user_id=user_id,  # None for guest orders
             full_name=metadata.get('full_name', 'Customer'),
             email=data['customer'].get('email'),
             phone=metadata.get('phone', 'N/A'),
@@ -592,10 +593,11 @@ def payment_callback():
                 'product_name': item['product_name'],
                 'quantity': int(item['quantity']),
                 'price': float(item['price']),
-                'original_price': float(item.get('original_price', item['price']))  # fallback
+                'original_price': float(item.get('original_price', item['price']))
             })
 
         db.session.commit()
+        
         # Notify admin (Paystack)
         try:
             send_admin_order_email(order, order_items_data)
@@ -607,7 +609,6 @@ def payment_callback():
                 f"[Bookshop] Failed to notify admin (Paystack) for order {unique_order_id}: {e}"
             )
 
-
         # Compute subtotal & discount safely
         subtotal = sum(i['original_price'] * i['quantity'] for i in order_items_data)
         discount = sum((i['original_price'] - i['price']) * i['quantity'] for i in order_items_data)
@@ -616,7 +617,7 @@ def payment_callback():
         try:
             api_data = {
                 'order_id': unique_order_id,
-                'user_id': metadata.get('user_id'),
+                'user_id': user_id,  # None for guests
                 'full_name': order.full_name,
                 'email': order.email,
                 'phone': phone,
@@ -637,7 +638,7 @@ def payment_callback():
                 'Content-Type': 'application/json'
             }
             api_res = requests.post(
-                f'{os.getenv('API_BASE_URL')}/orders',
+                f'{os.getenv("API_BASE_URL")}/orders',
                 json=api_data,
                 headers=api_headers,
                 timeout=10
@@ -661,6 +662,11 @@ def payment_callback():
             discount=discount
         )
 
+        # Clear cart - handle both authenticated and guest users
+        if current_user.is_authenticated:
+            Cart.query.filter_by(user_id=current_user.id).delete()
+            db.session.commit()
+        
         session.pop('cart', None)
         session.pop('paid_cart_items', None)
 
