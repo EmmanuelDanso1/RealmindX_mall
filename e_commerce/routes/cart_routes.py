@@ -253,7 +253,6 @@ def send_order_email(to, full_name, order_id, items, total, payment_method, addr
 
 
 @cart_bp.route('/cart/checkout', methods=['GET', 'POST'])
-@login_required
 def checkout():
     items = []
     grand_total = 0
@@ -535,7 +534,6 @@ def checkout():
 
 
 @cart_bp.route('/payment/callback')
-@login_required
 def payment_callback():
     reference = request.args.get('reference')
     if not reference:
