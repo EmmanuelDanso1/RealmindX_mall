@@ -66,10 +66,13 @@ def get_cart():
             session['cart'] = {}
         return session['cart']
 
-# Add to cart
+# Add to cart with option to stay or go to checkout
 @cart_bp.route('/cart/add/<int:product_id>', methods=['POST'])
 def add_to_cart(product_id):
     product = Product.query.get_or_404(product_id)
+    
+    # Get the redirect_to parameter from form (if provided)
+    redirect_to = request.form.get('redirect_to', 'stay')
     
     current_app.logger.info(f"[Add to Cart] Product {product_id} - User authenticated: {current_user.is_authenticated}")
     
@@ -131,7 +134,15 @@ def add_to_cart(product_id):
         session.modified = True
 
     flash(f"Added {product.name} to cart.", "success")
-    return redirect(request.referrer or url_for('main.home'))
+    
+    # Redirect based on user's choice
+    if redirect_to == 'checkout':
+        return redirect(url_for('cart.checkout'))
+    elif redirect_to == 'cart':
+        return redirect(url_for('cart.view_cart'))
+    else:
+        # Stay on current page
+        return redirect(request.referrer or url_for('main.home'))
 
 
 @cart_bp.route('/cart')
@@ -502,7 +513,7 @@ def checkout():
                     
                     if api_res.status_code == 201:
                         current_app.logger.info(
-                            f"[Bookshop] ✓ Order {unique_order_id} synced successfully to admin dashboard"
+                            f"[Bookshop] Order {unique_order_id} synced successfully to admin dashboard"
                         )
                     else:
                         current_app.logger.error(
@@ -703,6 +714,7 @@ def add_quantity(product_id):
 
     if request.method == 'POST':
         quantity = int(request.form.get('quantity', 1))
+        redirect_to = request.form.get('redirect_to', 'stay')  # NEW LINE
 
         # LOGGED-IN USER → DATABASE CART
         if current_user.is_authenticated:
@@ -746,6 +758,13 @@ def add_quantity(product_id):
             session.modified = True
 
         flash('Item added to cart successfully.', 'success')
-        return redirect(url_for('cart.view_cart'))
+        
+        # NEW: Handle redirect
+        if redirect_to == 'checkout':
+            return redirect(url_for('cart.checkout'))
+        elif redirect_to == 'cart':
+            return redirect(url_for('cart.view_cart'))
+        else:
+            return redirect(request.referrer or url_for('main.home'))
 
     return render_template('cart/add_quantity.html', product=product)

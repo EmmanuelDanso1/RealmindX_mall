@@ -3,27 +3,73 @@
 {% block content %}
 <div class="container mt-5">
   <div class="row">
+    <!-- Product Image -->
     <div class="col-md-6">
-      <img src="{{ url_for('static', filename='uploads/' + product.image_filename) }}" alt="{{ product.name }}" class="img-fluid">
+      <img src="{{ url_for('static', filename='uploads/' + product.image_filename) }}" 
+           alt="{{ product.name }}" 
+           class="img-fluid rounded shadow">
     </div>
+
+    <!-- Product Details -->
     <div class="col-md-6">
       <h2>{{ product.name }}</h2>
       <p class="text-muted">{{ product.description }}</p>
 
       <!-- Price Display -->
       {% if product.discount_percentage and product.discount_percentage > 0 %}
-        <h4 class="text-primary">GH₵{{ '%.2f' % product.discounted_price }}</h4>
+        <h4 class="text-danger fw-bold">GH₵{{ '%.2f' % product.discounted_price }}</h4>
         <p class="text-muted"><del>GH₵{{ '%.2f' % product.price }}</del></p>
-        <span class="badge bg-danger">{{ product.discount_percentage }}% OFF</span>
+        <span class="badge bg-success">{{ product.discount_percentage }}% OFF</span>
       {% else %}
-        <h4 class="text-primary">GH₵{{ '%.2f' % product.price }}</h4>
+        <h4 class="text-primary fw-bold">GH₵{{ '%.2f' % product.price }}</h4>
       {% endif %}
 
-      {% if product.in_stock %}
-        <span class="badge bg-success">In Stock</span>
-      {% else %}
-        <span class="badge bg-danger">Out of Stock</span>
-      {% endif %}
+      <!-- Stock Status -->
+      <div class="mt-2 mb-3">
+        {% if product.in_stock %}
+          <span class="badge bg-success">In Stock</span>
+        {% else %}
+          <span class="badge bg-danger">Out of Stock</span>
+        {% endif %}
+      </div>
+
+      <!-- Add to Cart Form -->
+      <form method="POST" id="addToCartForm" class="mt-4">
+        <div class="mb-3">
+          <label for="quantity" class="form-label fw-bold">Quantity</label>
+          <input type="number" 
+                 name="quantity" 
+                 id="quantity" 
+                 class="form-control" 
+                 min="1" 
+                 value="1" 
+                 style="max-width: 150px;"
+                 required>
+        </div>
+
+        <!-- Two Button Options -->
+        <div class="d-flex gap-2 flex-wrap mb-4">
+          <!-- Add to Cart and Stay -->
+          <button type="submit" 
+                  class="btn btn-primary"
+                  formaction="{{ url_for('cart.add_quantity', product_id=product.id) }}"
+                  name="redirect_to"
+                  value="stay"
+                  {% if not product.in_stock %}disabled{% endif %}>
+            <i class="bi bi-cart-plus"></i> Add to Cart
+          </button>
+
+          <!-- Buy Now (Add and Go to Checkout) -->
+          <button type="submit" 
+                  class="btn btn-success"
+                  formaction="{{ url_for('cart.add_quantity', product_id=product.id) }}"
+                  name="redirect_to"
+                  value="checkout"
+                  {% if not product.in_stock %}disabled{% endif %}>
+            <i class="bi bi-lightning-fill"></i> Buy Now
+          </button>
+        </div>
+      </form>
 
       <!-- Average Rating -->
       <div class="mt-4">
@@ -47,7 +93,7 @@
         <!-- User Rating -->
         {% if current_user.is_authenticated %}
           {% if user_rating %}
-            <p class="text-muted">You rated this product: ⭐ {{ user_rating.rating }}/5</p>
+            <p class="text-muted">You rated this product: {{ user_rating.rating }}/5</p>
           {% else %}
             <form method="POST" action="{{ url_for('main.rate_product', product_id=product.id) }}">
               <div class="rating mb-2">
@@ -56,7 +102,7 @@
                   <label for="star{{ i }}">★</label>
                 {% endfor %}
               </div>
-              <button type="submit" class="btn btn-sm btn-primary">Submit</button>
+              <button type="submit" class="btn btn-sm btn-primary">Submit Rating</button>
             </form>
           {% endif %}
         {% else %}
@@ -64,18 +110,30 @@
         {% endif %}
       </div>
     </div>
-  </div><br>
+  </div>
+  <br>
 </div>
 
 <style>
+.rating {
+  display: inline-flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+}
+
 .rating label {
   font-size: 1.4rem;
   cursor: pointer;
+  color: #ddd;
+  transition: color 0.2s;
 }
+
 .rating input {
   display: none;
 }
+
 .rating label:hover,
+.rating label:hover ~ label,
 .rating input:checked ~ label {
   color: gold;
 }
