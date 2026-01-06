@@ -714,7 +714,7 @@ def add_quantity(product_id):
 
     if request.method == 'POST':
         quantity = int(request.form.get('quantity', 1))
-        redirect_to = request.form.get('redirect_to', 'stay')  # NEW LINE
+        redirect_to = request.form.get('redirect_to', 'stay')
 
         # LOGGED-IN USER → DATABASE CART
         if current_user.is_authenticated:
@@ -759,12 +759,13 @@ def add_quantity(product_id):
 
         flash('Item added to cart successfully.', 'success')
         
-        # NEW: Handle redirect
+        # Redirect logic
         if redirect_to == 'checkout':
             return redirect(url_for('cart.checkout'))
         elif redirect_to == 'cart':
             return redirect(url_for('cart.view_cart'))
         else:
-            return redirect(request.referrer or url_for('main.home'))
+            # Stay on current page - redirect back to where they came from
+            return redirect(request.referrer or url_for('main.shop'))
 
     return render_template('cart/add_quantity.html', product=product)
