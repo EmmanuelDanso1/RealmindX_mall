@@ -1,5 +1,5 @@
 {% extends "index.html" %}
-{% block title %}Add to Cart{% endblock %}
+{% block title %}{{ product.name }}{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
@@ -7,11 +7,11 @@
     <div class="row g-0">
       <!-- Product Image -->
       <div class="col-md-5">
-        <div class="position-relative" style="height: 100%; max-height: 300px; overflow: hidden;">
+        <div class="position-relative" style="height: 100%; min-height: 400px; overflow: hidden;">
           <img 
               src="{{ url_for('static', filename='uploads/' ~ product.image_filename) }}" 
               alt="{{ product.name }}" 
-              class="img-fluid rounded-start w-100 h-100" 
+              class="img-fluid w-100 h-100" 
               style="object-fit: cover;"
           >
 
@@ -25,37 +25,83 @@
         </div>
       </div>
 
-      <!-- Product Info and Quantity Form -->
+      <!-- Product Info and Add to Cart Form -->
       <div class="col-md-7">
-        <div class="card-body">
-          <h4 class="card-title">{{ product.name }}</h4>
+        <div class="card-body p-4">
+          <h4 class="card-title fw-bold">{{ product.name }}</h4>
 
+          <!-- Price Display -->
           {% if product.discount_percentage and product.discount_percentage > 0 %}
             <p class="card-text fw-bold mb-2">
               <span class="text-muted"><del>GH₵{{ '%.2f'|format(product.price) }}</del></span>
-              <span class="text-danger ms-2">GH₵{{ '%.2f'|format(product.discounted_price) }}</span>
+              <span class="text-danger ms-2 fs-4">GH₵{{ '%.2f'|format(product.discounted_price) }}</span>
               <span class="badge bg-success ms-1">{{ '%.0f'|format(product.discount_percentage) }}% OFF</span>
             </p>
           {% else %}
-            <p class="card-text text-primary fw-bold">Price per item: GH₵{{ '%.2f'|format(product.price) }}</p>
+            <p class="card-text text-primary fw-bold fs-4">GH₵{{ '%.2f'|format(product.price) }}</p>
           {% endif %}
 
+          <!-- Stock Status -->
           {% if product.in_stock %}
-            <span class="badge bg-success mb-2">In Stock</span>
+            <span class="badge bg-success mb-3">In Stock</span>
           {% else %}
-            <span class="badge bg-danger mb-2">Out of Stock</span>
+            <span class="badge bg-danger mb-3">Out of Stock</span>
           {% endif %}
 
-          <form method="POST" action="{{ url_for('cart.add_quantity', product_id=product.id) }}" class="mt-3">
+          <!-- Description -->
+          {% if product.description %}
+          <div class="mt-3 mb-4">
+            <h6 class="fw-bold">Description:</h6>
+            <p class="text-muted">{{ product.description }}</p>
+          </div>
+          {% endif %}
+
+          <!-- Add to Cart Form -->
+          <form method="POST" action="{{ url_for('cart.add_quantity', product_id=product.id) }}" class="mt-4">
             <div class="mb-3">
-              <label for="quantity" class="form-label">Quantity</label>
-              <input type="number" name="quantity" id="quantity" class="form-control" min="1" value="1" required>
+              <label for="quantity" class="form-label fw-bold">Quantity</label>
+              <input type="number" 
+                     name="quantity" 
+                     id="quantity" 
+                     class="form-control" 
+                     min="1" 
+                     value="1" 
+                     style="max-width: 150px;"
+                     required>
             </div>
-            <button type="submit" class="btn btn-primary" {% if not product.in_stock %}disabled{% endif %}>Add to Cart</button>
+
+            <!-- Two Buttons -->
+            <div class="d-flex gap-2 flex-wrap">
+              <!-- Add to Cart (Stay on page) -->
+              <button type="submit" 
+                      class="btn btn-primary px-4"
+                      name="redirect_to"
+                      value="stay"
+                      {% if not product.in_stock %}disabled{% endif %}>
+                <i class="bi bi-cart-plus"></i> Add to Cart
+              </button>
+
+              <!-- Buy Now (Go to Checkout) -->
+              <button type="submit" 
+                      class="btn btn-success px-4"
+                      name="redirect_to"
+                      value="checkout"
+                      {% if not product.in_stock %}disabled{% endif %}>
+                <i class="bi bi-lightning-fill"></i> Buy Now
+              </button>
+            </div>
+
+            <!-- Continue Shopping Link -->
+            <div class="mt-3">
+              <a href="{{ url_for('main.shop') }}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Continue Shopping
+              </a>
+            </div>
           </form>
         </div>
       </div>
     </div>
   </div>
-</div><br>
+</div>
+<br>
 {% endblock %}

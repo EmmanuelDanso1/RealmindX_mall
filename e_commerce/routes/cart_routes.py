@@ -715,6 +715,8 @@ def add_quantity(product_id):
     if request.method == 'POST':
         quantity = int(request.form.get('quantity', 1))
         redirect_to = request.form.get('redirect_to', 'stay')
+        
+        current_app.logger.info(f"[Add Quantity] Product {product_id}, Quantity: {quantity}, Redirect: {redirect_to}")
 
         # LOGGED-IN USER → DATABASE CART
         if current_user.is_authenticated:
@@ -751,21 +753,24 @@ def add_quantity(product_id):
                         if product.discount_percentage > 0
                         else product.price
                     ),
+                    'image': product.image_filename,
                     'quantity': quantity
                 }
 
             session['cart'] = cart
             session.modified = True
 
-        flash('Item added to cart successfully.', 'success')
+        flash(f'Added {quantity} x {product.name} to cart successfully!', 'success')
         
-        # Redirect logic
+        # Redirect based on button clicked
         if redirect_to == 'checkout':
+            current_app.logger.info(f"[Add Quantity] Redirecting to checkout")
             return redirect(url_for('cart.checkout'))
         elif redirect_to == 'cart':
+            current_app.logger.info(f"[Add Quantity] Redirecting to cart")
             return redirect(url_for('cart.view_cart'))
         else:
-            # Stay on current page - redirect back to where they came from
+            current_app.logger.info(f"[Add Quantity] Redirecting back to: {request.referrer}")
             return redirect(request.referrer or url_for('main.shop'))
 
     return render_template('cart/add_quantity.html', product=product)
