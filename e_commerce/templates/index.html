@@ -181,11 +181,7 @@
           {% for cat in categories %}
           <li>
             <a href="{{ url_for('main.search', category=cat.id) }}" class="text-white" style="text-decoration: none;">
-              {% if cat.name|length in [3, 5] %}
-                {{ cat.name.upper() }}
-              {% else %}
-                {{ cat.name }}
-              {% endif %}
+              {{ cat.name }}
             </a>
           </li>
           {% endfor %}

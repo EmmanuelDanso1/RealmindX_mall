@@ -2,176 +2,333 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Your Order with RealMindX</title>
   <style>
-  body {
-    font-family: Arial, sans-serif;
-    color: #333;
-    background-color: #f2f2f2;
-    padding: 10px;
-  }
+    body {
+      font-family: Arial, sans-serif;
+      color: #333;
+      background-color: #f2f2f2;
+      padding: 0;
+      margin: 0;
+    }
 
-  .container {
-    background-color: #ffffff;
-    padding: 20px;
-    border-radius: 8px;
-    max-width: 700px;
-    margin: auto;
-  }
-
-  /* ACTION BUTTONS */
-  .actions {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 12px;
-    margin: 20px 0;
-  }
-
-  .actions a {
-    text-decoration: none;
-    color: #fff;
-    padding: 12px 18px;
-    border-radius: 5px;
-    font-weight: bold;
-    min-width: 140px;
-    text-align: center;
-  }
-
-  .btn-shop {
-    background-color: #007bff;
-  }
-
-  .btn-track {
-    background-color: #28a745;
-  }
-
-  /* SOCIAL LINKS */
-  .social-icons {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    margin: 20px 0;
-    font-size: 14px;
-  }
-
-  .social-icons a {
-    text-decoration: none;
-    font-weight: bold;
-    white-space: nowrap;
-  }
-
-  /* MOBILE OPTIMIZATION */
-  @media (max-width: 480px) {
-    .actions a {
-      width: 100%;
+    .email-wrapper {
+      background-color: #f2f2f2;
+      padding: 20px;
     }
 
     .container {
-      padding: 15px;
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 8px;
+      max-width: 600px;
+      margin: 0 auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-  }
-</style>
 
+    /* LOGO */
+    .logo {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .logo img {
+      max-width: 150px;
+      height: auto;
+    }
+
+    /* HEADING */
+    h2 {
+      color: #0C2E60;
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+
+    /* ACTION BUTTONS */
+    .actions {
+      text-align: center;
+      margin: 25px 0;
+    }
+
+    .btn {
+      display: inline-block;
+      text-decoration: none;
+      color: #fff;
+      padding: 12px 30px;
+      border-radius: 5px;
+      font-weight: bold;
+      margin: 5px 10px;
+      font-size: 16px;
+    }
+
+    .btn-shop {
+      background-color: #007bff;
+    }
+
+    .btn-track {
+      background-color: #28a745;
+    }
+
+    /* ORDER DETAILS */
+    .order-info {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 5px;
+      margin: 20px 0;
+    }
+
+    .order-info p {
+      margin: 8px 0;
+      line-height: 1.6;
+    }
+
+    /* SECTION TITLES */
+    .section-title {
+      background-color: #0C2E60;
+      color: white;
+      padding: 10px 15px;
+      margin: 20px 0 10px 0;
+      border-radius: 5px;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    /* TABLE */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+    }
+
+    table th {
+      background-color: #0C2E60;
+      color: white;
+      padding: 12px;
+      text-align: left;
+      font-weight: bold;
+    }
+
+    table td {
+      padding: 12px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    table tbody tr:hover {
+      background-color: #f8f9fa;
+    }
+
+    table tfoot td {
+      font-weight: bold;
+      border-top: 2px solid #0C2E60;
+      padding-top: 15px;
+    }
+
+    .total-amount {
+      color: #28a745;
+      font-size: 18px;
+    }
+
+    /* SOCIAL MEDIA */
+    .social-section {
+      text-align: center;
+      margin: 30px 0;
+      padding: 20px;
+      background-color: #f8f9fa;
+      border-radius: 5px;
+    }
+
+    .social-title {
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: #0C2E60;
+    }
+
+    .social-icons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .social-icons a {
+      text-decoration: none;
+      font-weight: bold;
+      padding: 8px 15px;
+      border-radius: 5px;
+      color: white;
+      font-size: 14px;
+      transition: opacity 0.3s;
+    }
+
+    .social-icons a:hover {
+      opacity: 0.8;
+    }
+
+    .social-fb { background-color: #1877F2; }
+    .social-x { background-color: #000000; }
+    .social-ig { background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); }
+    .social-yt { background-color: #FF0000; }
+    .social-wa { background-color: #25D366; }
+
+    /* FOOTER */
+    .footer {
+      text-align: center;
+      padding: 20px;
+      background-color: #f8f9fa;
+      border-radius: 5px;
+      margin-top: 30px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .footer p {
+      margin: 8px 0;
+      line-height: 1.6;
+    }
+
+    /* MOBILE OPTIMIZATION */
+    @media (max-width: 600px) {
+      .container {
+        padding: 20px;
+      }
+
+      .btn {
+        display: block;
+        margin: 10px 0;
+      }
+
+      table {
+        font-size: 14px;
+      }
+
+      table th, table td {
+        padding: 8px;
+      }
+
+      h2 {
+        font-size: 20px;
+      }
+
+      .social-icons {
+        gap: 10px;
+      }
+
+      .social-icons a {
+        font-size: 12px;
+        padding: 6px 10px;
+      }
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <!-- Logo -->
-    <div class="logo">
-      <img src="https://bookshop.realmindxgh.com/static/images/brain.jpg"
-          alt="RealMindX Logo"
-          style="height: 60px; width: auto;">
-    </div>
+  <div class="email-wrapper">
+    <div class="container">
+      
+      <!-- Logo -->
+      <div class="logo">
+        <img src="https://bookshop.realmindxgh.com/static/images/brain.jpg" alt="RealMindX Logo">
+      </div>
 
-    <!-- Buttons -->
-    <div class="actions">
-      <a href="https://bookshop.realmindxgh.com" class="btn-shop">
-        Shop Now
-      </a>
+      <!-- Heading -->
+      <h2>Your Order Has Been Successfully Placed!</h2>
 
-      <a href="https://bookshop.realmindxgh.com/track-order" class="btn-track">
-        Track Order
-      </a>
-    </div>
+      <!-- Action Buttons -->
+      <div class="actions">
+        <a href="https://bookshop.realmindxgh.com" class="btn btn-shop">🛍️ Shop Now</a>
+        <a href="https://bookshop.realmindxgh.com/track-order" class="btn btn-track">📦 Track Order</a>
+      </div>
 
+      <!-- Greeting -->
+      <p>Dear <strong>{{ full_name }}</strong>,</p>
 
-    <!-- Greeting -->
-    <h2>Your Order Has Been Successfully Placed!</h2>
-    <p>Dear {{ full_name }},</p>
+      <p>Thank you for shopping with <strong>RealMindX Education Ltd</strong>!</p>
+      
+      <p>We will contact you shortly to confirm your order details, so please keep your phone accessible. If you do not receive a confirmation call within <strong>One (1) business day</strong>, please reach out to our customer service.</p>
 
-    <p>Thank you for shopping with RealMindX Education Ltd!<br>
-    We will contact you shortly to confirm your order details, so please keep your phone accessible.  
-    If you do not receive a confirmation call within One(1) business day, please reach out to our customer service.</p>
+      <!-- Order Information -->
+      <div class="order-info">
+        <p><strong>Order ID:</strong> {{ order_id }}</p>
+        <p><strong>Placed on:</strong> {{ order_date }}</p>
+        <p><strong>Payment Method:</strong> {{ payment_method }}</p>
+      </div>
 
-    <!-- Order Info -->
-    <div class="order-details">
-      <p><strong>Your Order ID:</strong> {{ order_id }}</p>
-      <p><strong>Placed on:</strong> {{ order_date }}</p>
+      <!-- Billing Info -->
+      <div class="section-title">Billing Information</div>
+      <div class="order-info">
+        <p><strong>Name:</strong> {{ full_name }}</p>
+        <p><strong>Address:</strong> {{ address }}</p>
+        <p><strong>Phone:</strong> {{ phone }}</p>
+      </div>
 
-      <div class="section-title">Billing Info</div>
-      <p><strong>Name:</strong> {{ full_name }}</p>
-      <p><strong>Address:</strong> {{ address }}</p>
-      <p><strong>Tel:</strong> {{ phone }}</p>
-      <p><strong>Payment Method:</strong> {{ payment_method }}</p>
-
-      <div class="section-title">Items</div>
+      <!-- Order Items -->
+      <div class="section-title">Order Items</div>
       <table>
-        <thead style="color: #0C2E60;">
+        <thead>
           <tr>
             <th>Item</th>
-            <th>Qty</th>
-            <th>Price (GH₵)</th>
+            <th style="text-align: center;">Qty</th>
+            <th style="text-align: right;">Price (GH₵)</th>
           </tr>
         </thead>
         <tbody>
           {% for item in items %}
           <tr>
             <td>
-              {{ item.product_name }}<br>
-              <small>SKU: {{ item.product_id }}</small>
+              <strong>{{ item.product_name }}</strong><br>
+              <small style="color: #666;">SKU: {{ item.product_id }}</small>
             </td>
-            <td>{{ item.quantity }}</td>
-            <td>{{ "%.2f"|format(item.price) }}</td>
+            <td style="text-align: center;">{{ item.quantity }}</td>
+            <td style="text-align: right;">{{ "%.2f"|format(item.price) }}</td>
           </tr>
           {% endfor %}
         </tbody>
         <tfoot>
           <tr>
-            <td colspan="2"><strong>Subtotal</strong></td>
-            <td>GH₵ {{ "%.2f"|format(subtotal) }}</td>
+            <td colspan="2">Subtotal</td>
+            <td style="text-align: right;">GH₵ {{ "%.2f"|format(subtotal) }}</td>
           </tr>
           <tr>
-            <td colspan="2"><strong>Discount</strong></td>
-            <td>GH₵ {{ "%.2f"|format(discount) }}</td>
+            <td colspan="2">Discount</td>
+            <td style="text-align: right;">- GH₵ {{ "%.2f"|format(discount) }}</td>
           </tr>
           <tr>
             <td colspan="2"><strong>Order Total</strong></td>
-            <td><strong style="color: green;">GH₵ {{ "%.2f"|format(total) }}</strong></td>
+            <td style="text-align: right;" class="total-amount">GH₵ {{ "%.2f"|format(total) }}</td>
           </tr>
         </tfoot>
       </table>
-    </div>
 
-    <p>Sincerely,<br>RealMindX Education Ltd</p>
+      <p style="margin-top: 30px;">
+        Sincerely,<br>
+        <strong>RealMindX Education Ltd</strong>
+      </p>
 
-    <!-- Social Media Icons (using simple text links for email compatibility) -->
-    <div class="social-icons">
-      <a href="https://web.facebook.com/profile.php?id=61566941171883" style="color:#1877F2;">Facebook</a>
-      <a href="https://x.com/RealMindXgh" style="color:#000;">X</a>
-      <a href="https://www.instagram.com/realmindxgh/" style="color:#E4405F;">Instagram</a>
-      <a href="https://www.youtube.com/@realmindxgh" style="color:#FF0000;">YouTube</a>
-      <a href="https://wa.link/d6x888" style="color:#25D366;">WhatsApp</a>
-    </div>
+      <!-- Social Media Section -->
+      <div class="social-section">
+        <div class="social-title">Connect With Us</div>
+        <div class="social-icons">
+          <a href="https://web.facebook.com/profile.php?id=61566941171883" class="social-fb">Facebook</a>
+          <a href="https://x.com/RealMindXgh" class="social-x">X (Twitter)</a>
+          <a href="https://www.instagram.com/realmindxgh/" class="social-ig">Instagram</a>
+          <a href="https://www.youtube.com/@realmindxgh" class="social-yt">YouTube</a>
+          <a href="https://wa.link/d6x888" class="social-wa">WhatsApp</a>
+        </div>
+      </div>
 
+      <!-- Footer -->
+      <div class="footer">
+        <p><strong>📞 Customer Service</strong></p>
+        <p>Monday–Saturday, 7:00 AM to 5:00 PM</p>
+        <p><strong>Hotline:</strong> (+233) 558039190 / 551324729 / 554529493</p>
+        <p><strong>WhatsApp:</strong> +233 558039190</p>
+        <p><strong>Email:</strong> realmindxgh@gmail.com</p>
+        <p style="margin-top: 15px; font-style: italic; font-size: 12px;">
+          Please note: This is an automated message. Replies will not be monitored.
+        </p>
+      </div>
 
-    <!-- Footer -->
-    <div class="footer">
-      <p>Customer service period: Monday–Saturday, 7AM to 5PM</p>
-      <p>Hotline: (+233) 558039190 / 551324729 / 554529493</p>
-      <p>WhatsApp: +233 558039190</p>
-      <p>Email: realmindxgh@gmail.com</p>
-      <p><em>Please note: This is an automated message. Replies will not be monitored.</em></p>
     </div>
   </div>
 </body>
