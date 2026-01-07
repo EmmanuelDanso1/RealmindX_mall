@@ -98,7 +98,7 @@
 
               <br>
               {% if product.in_stock %}
-              <a href="{{ url_for('main.product_detail', product_id=product.id) }}" class="btn btn-outline-dark btn-sm mt-2">View Details</a>
+              <a href="{{ url_for('main.product_detail', product_id=product.id) }}" class="btn btn-outline-dark btn-sm mt-2">Add to cart</a>
               {% else %}
               <button class="btn btn-outline-dark btn-sm mt-2" disabled>Out of Stock</button>
               {% endif %}
