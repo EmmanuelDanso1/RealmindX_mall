@@ -257,6 +257,7 @@
 {% endwith %}
 
 <!-- user inactive for 10 minutes -->
+{% if current_user.is_authenticated %}
 <script>
   let inactivityTimer;
   const logoutTime = 10 * 60 * 1000; // 10 minutes
@@ -276,5 +277,6 @@
   document.onclick = resetInactivityTimer;
   document.onscroll = resetInactivityTimer;
 </script>
+{% endif %}
 </body>
 </html>
