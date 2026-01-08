@@ -16,32 +16,40 @@
       text-decoration: none;
     }
     /* Remove ALL default margins and padding */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
     body {
       margin: 0;
       padding: 0;
+      overflow-x: hidden;
     }
     main {
       padding: 0 !important;
       margin: 0 !important;
     }
+    /* Remove navbar bottom margin/padding */
+    nav.navbar {
+      margin-bottom: 0 !important;
+    }
     /* Full-width hero section - absolutely no spacing */
     .hero-section {
-      width: 100vw;
+      width: 100%;
       margin: 0;
       padding: 0;
-      position: relative;
-      left: 50%;
-      right: 50%;
-      margin-left: -50vw;
-      margin-right: -50vw;
+      display: block;
+      line-height: 0;
     }
     .hero-section img {
       width: 100%;
       height: auto;
       display: block;
-      object-fit: contain; /* Changed from cover to contain - shows full image */
+      object-fit: contain;
       margin: 0;
       padding: 0;
+      vertical-align: top;
     }
   </style>
 </head>
