@@ -15,6 +15,35 @@
     .offcanvas-body a {
       text-decoration: none;
     }
+    /* Remove default margin/padding from main */
+    main {
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+    /* Full-width hero section */
+    .hero-section {
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    .hero-section img {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: cover;
+      max-height: 400px;
+    }
+    /* On larger screens, increase hero height */
+    @media (min-width: 768px) {
+      .hero-section img {
+        max-height: 500px;
+      }
+    }
+    @media (min-width: 992px) {
+      .hero-section img {
+        max-height: 600px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -130,16 +159,18 @@
   </div>
 </div>
 
-<main class="container mt-5 pt-4">
-  <!-- Flash Messages -->
+<main>
+  <!-- Flash Messages (with container) -->
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-      {% for category, message in messages %}
-        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-          {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-      {% endfor %}
+      <div class="container mt-3">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      </div>
     {% endif %}
   {% endwith %}
 
@@ -245,16 +276,6 @@
   });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, message in messages %}
-      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-        {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-      </div>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
 
 <!-- user inactive for 10 minutes -->
 {% if current_user.is_authenticated %}
