@@ -15,34 +15,33 @@
     .offcanvas-body a {
       text-decoration: none;
     }
-    /* Remove default margin/padding from main */
-    main {
-      padding-left: 0 !important;
-      padding-right: 0 !important;
-    }
-    /* Full-width hero section */
-    .hero-section {
-      width: 100%;
+    /* Remove ALL default margins and padding */
+    body {
       margin: 0;
       padding: 0;
+    }
+    main {
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+    /* Full-width hero section - absolutely no spacing */
+    .hero-section {
+      width: 100vw;
+      margin: 0;
+      padding: 0;
+      position: relative;
+      left: 50%;
+      right: 50%;
+      margin-left: -50vw;
+      margin-right: -50vw;
     }
     .hero-section img {
       width: 100%;
       height: auto;
       display: block;
-      object-fit: cover;
-      max-height: 400px;
-    }
-    /* On larger screens, increase hero height */
-    @media (min-width: 768px) {
-      .hero-section img {
-        max-height: 500px;
-      }
-    }
-    @media (min-width: 992px) {
-      .hero-section img {
-        max-height: 600px;
-      }
+      object-fit: contain; /* Changed from cover to contain - shows full image */
+      margin: 0;
+      padding: 0;
     }
   </style>
 </head>
