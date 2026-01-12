@@ -240,7 +240,7 @@
         <h5 class="footer-title" style="color: #ffcc01;">Customer Care</h5>
         <ul class="list-unstyled">
           <li><a href="{{ url_for('auth.login') }}" class="text-white" style="text-decoration: none;">My Account</a></li>
-          <li><a href="{{ url_for('main.purchased_products') if current_user.is_authenticated else url_for('auth.login') }}" class="text-white" style="text-decoration: none;">My Orders</a></li>
+          <li><a href="{{ url_for('main.my_orders') if current_user.is_authenticated else url_for('auth.login') }}" class="text-white" style="text-decoration: none;">My Orders</a></li>
           <li><a href="{{ url_for('cart.checkout') }}" class="text-white" style="text-decoration: none;">Checkout</a></li>
           <li><a href="#" class="text-white" style="text-decoration: none;">Terms & Conditions</a></li>
         </ul>
