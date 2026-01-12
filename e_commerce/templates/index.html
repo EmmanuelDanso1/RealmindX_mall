@@ -131,7 +131,7 @@
             <a href="{{ url_for('auth.user_signup') }}" class="btn  btn-sm rounded-pill" style="background-color: #143670; color: #fff">Signup</a>
           {% else %}
             <span class="me-3">Welcome, {{ current_user.full_name }}</span>
-            <a class="nav-link me-3" href="{{ url_for('main.purchased_products') }}"><i class="fas fa-box-open me-1"></i> My Orders</a>
+            <a class="nav-link me-3" href="{{ url_for('main.my_orders') }}"><i class="fas fa-box-open me-1"></i> My Orders</a>
             <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger btn-sm rounded-pill">Logout</a>
           {% endif %}
         </div>
@@ -158,7 +158,7 @@
         <li class="list-group-item"><a href="{{ url_for('auth.user_signup') }}" style="color: #143670;"><i class="fas fa-user-plus me-2"></i>Signup</a></li>
       {% else %}
         <li class="list-group-item disabled"><i class="fas fa-user me-2"></i>Welcome, {{ current_user.username }}</li>
-        <li class="list-group-item"><a href="{{ url_for('main.purchased_products') }}" style="color: #143670;"><i class="fas fa-box-open me-2"></i>My Orders</a></li>
+        <li class="list-group-item"><a href="{{ url_for('main.my_orders') }}" style="color: #143670;"><i class="fas fa-box-open me-2"></i>My Orders</a></li>
         <li class="list-group-item"><a href="{{ url_for('auth.logout') }}" style="color: #143670;"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
       {% endif %}
     </ul>
