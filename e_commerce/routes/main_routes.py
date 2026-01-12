@@ -312,18 +312,40 @@ def product_detail(product_id):
     return render_template('product_detail.html', product=product, user_rating=user_rating)
 
 # see ordered products
-@main_bp.route('/my-products') 
+@main_bp.route('/my-orders')
 @login_required
-def purchased_products():
-    purchased_items = (
-        db.session.query(Product)
-        .join(OrderItem)
-        .join(Order)
-        .filter(Order.user_id == current_user.id)
-        .distinct()
-        .all()
-    )
-    return render_template('my_products.html', products=purchased_items)
+def my_orders():
+    orders = Order.query.filter_by(user_id=current_user.id)\
+                         .order_by(Order.created_at.desc())\
+                         .all()
+    return render_template('my_orders.html', orders=orders)
+
+@main_bp.route('/reorder/<int:order_id>')
+@login_required
+def reorder(order_id):
+    order = Order.query.filter_by(
+        id=order_id,
+        user_id=current_user.id
+    ).first_or_404()
+
+    for item in order.items:
+        cart_item = Cart.query.filter_by(
+            user_id=current_user.id,
+            product_id=item.product_id
+        ).first()
+
+        if cart_item:
+            cart_item.quantity += item.quantity
+        else:
+            db.session.add(Cart(
+                user_id=current_user.id,
+                product_id=item.product_id,
+                quantity=item.quantity
+            ))
+
+    db.session.commit()
+    flash('Items added to cart. You can checkout now.', 'success')
+    return redirect(url_for('main.cart'))
 
 # contact
 @main_bp.route('/submit', methods=['POST'])

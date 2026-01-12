@@ -1,0 +1,44 @@
+{% extends 'index.html' %}
+{% block content %}
+
+<div class="container mt-5">
+  <h2 class="text-center mb-4">My Orders</h2>
+
+  {% for order in orders %}
+    <div class="card mb-4 shadow-sm">
+      <div class="card-header d-flex justify-content-between">
+        <strong>Order #{{ order.id }}</strong>
+        <span class="text-muted">
+          {{ order.created_at.strftime('%d %b %Y') }}
+        </span>
+      </div>
+
+      <div class="card-body">
+        <ul class="list-group mb-3">
+          {% for item in order.items %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <div>
+                <strong>{{ item.product.name }}</strong><br>
+                Qty: {{ item.quantity }}
+              </div>
+              <span>GH₵{{ '%.2f' % (item.price * item.quantity) }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+
+        <div class="d-flex justify-content-between align-items-center">
+          <strong>Total: GH₵{{ '%.2f' % order.total_amount }}</strong>
+
+          <a href="{{ url_for('main.reorder', order_id=order.id) }}"
+             class="btn btn-sm btn-outline-primary">
+            Order Again
+          </a>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <p class="text-center">You have not placed any orders yet.</p>
+  {% endfor %}
+</div>
+
+{% endblock %}
