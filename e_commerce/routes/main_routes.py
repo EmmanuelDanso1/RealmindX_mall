@@ -4,7 +4,7 @@ from flask_mail import Mail,Message
 import os
 from e_commerce.utils.helpers import generate_random_order_id
 from extensions import db, mail
-from e_commerce.models import Product, ProductRating, NewsletterSubscriber, Category,PromotionFlier, Order, OrderItem, InfoDocument
+from e_commerce.models import Product, ProductRating, NewsletterSubscriber, Category,PromotionFlier, Order, OrderItem, InfoDocument, Cart
 from e_commerce.utils.token import generate_verification_token, confirm_verification_token
 import logging
 
