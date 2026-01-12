@@ -344,8 +344,7 @@ def reorder(order_id):
             ))
 
     db.session.commit()
-    flash('Items added to cart. You can checkout now.', 'success')
-    return redirect(url_for('main.cart'))
+    return redirect(url_for('main.shop'))
 
 # contact
 @main_bp.route('/submit', methods=['POST'])
