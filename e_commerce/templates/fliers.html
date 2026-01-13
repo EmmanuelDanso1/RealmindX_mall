@@ -18,7 +18,7 @@
         <div class="carousel-item {% if loop.index0 == 0 %}active{% endif %}">
           <img src="{{ url_for('static', filename='uploads/fliers/' ~ flier.image_filename) }}"
                class="d-block w-100"
-               style="height: 300px; object-fit: cover;"
+               style="height: auto; max-height: 500px; object-fit: contain; background-color: #f8f9fa;"
                alt="{{ flier.title or 'Promotion Flier' }}">
         </div>
       {% endfor %}
