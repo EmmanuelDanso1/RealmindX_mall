@@ -11,14 +11,14 @@
 <body>
 
   {% if fliers %}
-  <!-- Carousel - Full Width -->
+  <!-- Carousel - Full Width Landscape -->
   <div id="flierCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
     <div class="carousel-inner">
       {% for flier in fliers %}
         <div class="carousel-item {% if loop.index0 == 0 %}active{% endif %}">
           <img src="{{ url_for('static', filename='uploads/fliers/' ~ flier.image_filename) }}"
                class="d-block w-100"
-               style="height: 300px; object-fit: cover;"
+               style="height: 400px; object-fit: cover;"
                alt="{{ flier.title or 'Promotion Flier' }}">
         </div>
       {% endfor %}
@@ -33,6 +33,29 @@
       </button>
     {% endif %}
   </div>
+
+  <style>
+    /* Desktop - Full height */
+    @media (min-width: 768px) {
+      #flierCarousel .carousel-item img {
+        height: 500px;
+      }
+    }
+    
+    /* Tablet */
+    @media (max-width: 767px) and (min-width: 576px) {
+      #flierCarousel .carousel-item img {
+        height: 350px;
+      }
+    }
+    
+    /* Mobile */
+    @media (max-width: 575px) {
+      #flierCarousel .carousel-item img {
+        height: 280px;
+      }
+    }
+  </style>
   {% endif %}
 
 
