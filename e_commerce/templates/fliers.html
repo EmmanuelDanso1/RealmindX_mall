@@ -11,17 +11,15 @@
 <body>
 
   {% if fliers %}
-  <!-- Carousel -->
-  <div id="flierCarousel" class="carousel slide mb-5" data-bs-ride="carousel">
+  <!-- Carousel - Full Width -->
+  <div id="flierCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
     <div class="carousel-inner">
       {% for flier in fliers %}
         <div class="carousel-item {% if loop.index0 == 0 %}active{% endif %}">
-          
           <img src="{{ url_for('static', filename='uploads/fliers/' ~ flier.image_filename) }}"
-               class="d-block w-100 rounded"
-               style="height: 400px; object-fit: cover;"
+               class="d-block w-100"
+               style="height: 300px; object-fit: cover;"
                alt="{{ flier.title or 'Promotion Flier' }}">
-
         </div>
       {% endfor %}
     </div>
@@ -35,7 +33,7 @@
       </button>
     {% endif %}
   </div>
-{% endif %}
+  {% endif %}
 
 
   <!-- Bootstrap JS (with Popper) -->

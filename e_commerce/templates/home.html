@@ -2,8 +2,10 @@
 {% block title %}Welcome | RealmindX Bookshop{% endblock %}
 
 {% block content %}
+{% include 'fliers.html' %}
+
 <div class="container-fluid my-4">
-  {% include 'fliers.html' %}
+  
   {% if not current_user.is_authenticated %}
     <h2 class="text-center mb-3" style="color: #0C2E60;">Latest Books</h2>
 
